@@ -1,0 +1,266 @@
+{
+  "updated": "2026-11-06T18:20:38.166Z",
+  "intro": {
+    "title": "Tenant Portal",
+    "text": "Everything for The Reserve's tenants in one place: what's happening on campus, amenities, forms and who to contact."
+  },
+  "announcements": [
+    {
+      "title": "Fitness Center + Conference Rooms",
+      "text": "Both are closed for renovations. We'll post here as soon as they reopen.",
+      "link": "",
+      "linkLabel": "",
+      "from": "",
+      "until": "2027-03-31"
+    },
+    {
+      "title": "Kayak & Paddleboard Season",
+      "text": "The 2026 season has ended. New kayaks are coming for Summer 2027!",
+      "link": "",
+      "linkLabel": "",
+      "from": "",
+      "until": "2027-05-31"
+    }
+  ],
+  "events": [
+    {
+      "id": "Tmw4wzzye0",
+      "title": "Food Trucks",
+      "date": "2026-09-01",
+      "start": "11:00",
+      "end": "14:00",
+      "location": "Gateway 112 (11201 SE 8th St)",
+      "text": "Local food trucks serve lunch on campus every weekday.",
+      "link": "https://bellefield-officepark.com/wp-content/uploads/2026/07/July-Food-Truck-Schedule.pdf",
+      "linkLabel": "Food truck schedule",
+      "status": "approved",
+      "repeat": {
+        "every": "week",
+        "days": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "until": ""
+      }
+    }
+  ],
+  "amenities": [
+    {
+      "name": "Food Trucks",
+      "category": "Food & Drink",
+      "status": "open",
+      "note": "",
+      "hours": "Weekdays, 11:00 AM - 2:00 PM",
+      "text": "Local food trucks serve lunch at Gateway 112 (11201 SE 8th St).",
+      "image": "",
+      "buttons": [
+        {
+          "label": "Monthly schedule",
+          "url": "https://bellefield-officepark.com/wp-content/uploads/2026/07/July-Food-Truck-Schedule.pdf"
+        }
+      ]
+    },
+    {
+      "name": "Dilettante Mocha Cafe",
+      "category": "Food & Drink",
+      "status": "open",
+      "note": "",
+      "hours": "Mon - Fri, 6:30 AM - 5:00 PM",
+      "text": "Breakfast, espresso drinks, lunch and happy hour. Order online or call (425) 451-4068 for pickup.",
+      "image": "",
+      "buttons": [
+        {
+          "label": "Order online",
+          "url": "https://dilettante.revelup.online/store/4/category/102/subcategory/103"
+        },
+        {
+          "label": "Call",
+          "url": "tel:+14254514068"
+        },
+        {
+          "label": "Menu",
+          "url": "https://bellefield-officepark.com/wp-content/uploads/2021/07/Dillettante-Menu_July2021.pdf"
+        }
+      ]
+    },
+    {
+      "name": "Fitness Classes with ZenRock",
+      "category": "Fitness & Wellness",
+      "status": "seasonal",
+      "note": "Fall series ended",
+      "hours": "Thursdays, 8:00 - 9:00 AM",
+      "text": "Complimentary classes for tenants at ZenRock Bellevue, rotating monthly: yoga, strength, core and cardio. RSVP by email.",
+      "image": "",
+      "buttons": [
+        {
+          "label": "RSVP",
+          "url": "mailto:RSVP@talon-m.com"
+        },
+        {
+          "label": "ZenRock Bellevue",
+          "url": "https://zenrockfitness.com/bellevue/"
+        }
+      ]
+    },
+    {
+      "name": "Fitness Center",
+      "category": "Fitness & Wellness",
+      "status": "closed",
+      "note": "Closed for renovations",
+      "hours": "",
+      "text": "Temporarily closed for renovations. You can submit your waiver ahead of time by emailing Gabbie.",
+      "image": "",
+      "buttons": [
+        {
+          "label": "Fitness Center waiver",
+          "url": "https://bellefield-officepark.com/wp-content/uploads/2026/06/Fitness-Center-Waiver-GC-Bellefield-Fillable-PDF.pdf"
+        },
+        {
+          "label": "Email Gabbie",
+          "url": "mailto:gwhite@talon-m.com"
+        }
+      ]
+    },
+    {
+      "name": "Kayak & Paddleboard",
+      "category": "Outdoors",
+      "status": "seasonal",
+      "note": "Back Summer 2027",
+      "hours": "",
+      "text": "Paddle the campus waterways. Submit the equipment share application and waiver, then email Gabbie for approval.",
+      "image": "",
+      "buttons": [
+        {
+          "label": "Application + waiver",
+          "url": "https://bellefield-officepark.com/wp-content/uploads/2026/06/Share-Program-Application-Waiver-of-Liability-GC-Bellefield.pdf"
+        },
+        {
+          "label": "Email Gabbie",
+          "url": "mailto:gwhite@talon-m.com"
+        }
+      ]
+    },
+    {
+      "name": "Walking Trails",
+      "category": "Outdoors",
+      "status": "open",
+      "note": "",
+      "hours": "",
+      "text": "Nature trails start right outside the office. Look for “Habitat Being Created Here” signs near fallen trees left for wildlife.",
+      "image": "",
+      "buttons": [
+        {
+          "label": "Trail map",
+          "url": "https://bellefield-officepark.com/wp-content/uploads/2017/10/BellefieldWalkingMapTrail.pdf"
+        },
+        {
+          "label": "Vegetation plan",
+          "url": "https://development.bellevuewa.gov/UserFiles/Servers/Server_4779004/File/pdf/Land%20Use/19-103347-LO.pdf"
+        }
+      ]
+    },
+    {
+      "name": "Conference Rooms",
+      "category": "Meeting Space",
+      "status": "closed",
+      "note": "Closed for renovations",
+      "hours": "",
+      "text": "Temporarily closed for renovations. Questions? Contact Talon M Management.",
+      "image": "",
+      "buttons": []
+    },
+    {
+      "name": "Dry Cleaning",
+      "category": "Services",
+      "status": "open",
+      "note": "",
+      "hours": "",
+      "text": "Bakker's Fine Dry Cleaning picks up and delivers right to your office, with The Reserve's preferred pricing.",
+      "image": "",
+      "buttons": [
+        {
+          "label": "How it works",
+          "url": "https://bellefield-officepark.com/wp-content/uploads/2026/04/Drycleaning-Info-Sheet.pdf"
+        },
+        {
+          "label": "Price list",
+          "url": "https://bakkersfinedrycleaning.com/"
+        }
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "title": "Food truck schedule",
+      "note": "This month's lineup",
+      "url": "https://bellefield-officepark.com/wp-content/uploads/2026/07/July-Food-Truck-Schedule.pdf"
+    },
+    {
+      "title": "Dilettante Mocha Cafe menu",
+      "note": "",
+      "url": "https://bellefield-officepark.com/wp-content/uploads/2021/07/Dillettante-Menu_July2021.pdf"
+    },
+    {
+      "title": "Fitness Center waiver",
+      "note": "Fillable PDF",
+      "url": "https://bellefield-officepark.com/wp-content/uploads/2026/06/Fitness-Center-Waiver-GC-Bellefield-Fillable-PDF.pdf"
+    },
+    {
+      "title": "Equipment share application + waiver",
+      "note": "Kayaks and paddleboards",
+      "url": "https://bellefield-officepark.com/wp-content/uploads/2026/06/Share-Program-Application-Waiver-of-Liability-GC-Bellefield.pdf"
+    },
+    {
+      "title": "Walking trail map",
+      "note": "Printable",
+      "url": "https://bellefield-officepark.com/wp-content/uploads/2017/10/BellefieldWalkingMapTrail.pdf"
+    },
+    {
+      "title": "Dry cleaning: how it works",
+      "note": "Bakker's Fine Dry Cleaning",
+      "url": "https://bellefield-officepark.com/wp-content/uploads/2026/04/Drycleaning-Info-Sheet.pdf"
+    }
+  ],
+  "contacts": [
+    {
+      "name": "Property Management Office",
+      "role": "Talon M Management",
+      "phone": "(425) 289-4900",
+      "email": "bellefield@talon-m.com",
+      "address": "1450 114th Ave SE, Ste 205 (Conifer Bldg), Bellevue, WA 98004"
+    },
+    {
+      "name": "Gabbie",
+      "role": "Waivers, equipment share, tenant news",
+      "phone": "",
+      "email": "gwhite@talon-m.com",
+      "address": ""
+    },
+    {
+      "name": "Fitness class RSVPs",
+      "role": "ZenRock classes",
+      "phone": "",
+      "email": "RSVP@talon-m.com",
+      "address": ""
+    }
+  ],
+  "connect": {
+    "title": "Connect with us",
+    "text": "Share your company news, photos or events and we may feature them.",
+    "hashtag": "#BellefieldOP",
+    "email": "gwhite@talon-m.com",
+    "links": [
+      {
+        "label": "Instagram",
+        "url": "https://www.instagram.com/bellefieldofficepark/"
+      },
+      {
+        "label": "Facebook",
+        "url": "https://www.facebook.com/BellefieldOP"
+      }
+    ]
+  }
+}
