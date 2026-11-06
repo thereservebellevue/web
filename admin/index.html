@@ -833,12 +833,16 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
         th.appendChild(im); th.addEventListener("click", function () { $("view-img").src = s.floorplan; open("dlg-view"); });
         var fp = el("div", "fp"); fp.appendChild(th);
         if (s.pdf) {
-          var a = el("a", "pdfl", "PDF ↗"); a.href = s.pdf; a.target = "_blank"; a.rel = "noopener"; a.title = "Open the floorplan PDF"; fp.appendChild(a);
+          var fresh = pdfFresh(s.pdf);
+          var a = el("a", "pdfl", fresh ? "PDF · 1 min" : "PDF ↗"); a.href = s.pdf; a.target = "_blank"; a.rel = "noopener";
+          a.title = fresh ? "Just made. GitHub takes about a minute to put new files online. If it says 404, wait a moment and refresh." : "Open the floorplan PDF";
+          fp.appendChild(a);
+          if (fresh) setTimeout(renderRows, 90000);
         } else {
           var mk = el("button", "pdfl make", "Make PDF"); mk.type = "button"; mk.title = "Make the branded floorplan PDF";
           mk.addEventListener("click", function () {
             mk.disabled = true; mk.textContent = "Making…";
-            makePdf(s).then(function () { toast("PDF made. Publish to add it to the website."); return refresh(); })
+            makePdf(s).then(function () { toast("PDF made. It can be opened in about a minute (GitHub needs a moment). Publish to add it to the website."); return refresh(); })
               .catch(function (err) { toast(err.message, true); mk.disabled = false; mk.textContent = "Make PDF"; });
           });
           fp.appendChild(mk);
@@ -879,7 +883,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
     $("pdfrow").hidden = !plan; $("keyrow").hidden = !plan;
     if (plan) $("dial-img").src = planData[plan] || src || plan;
     $("a-pdf").hidden = !(ed && ed.pdf && plan === ed.floorplan);
-    if (ed && ed.pdf) $("a-pdf").href = ed.pdf;
+    if (ed && ed.pdf) { $("a-pdf").href = ed.pdf; $("a-pdf").textContent = pdfFresh(ed.pdf) ? "Current PDF (online in ~1 min)" : "Open current PDF"; }
   }
   function editSuite(s) {
     state.editing = s || null;
@@ -1145,6 +1149,11 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
     var viaBackend = function () { return api("fetchImage", { url: url }).then(function (j) { planData[url] = j.data; return loadImg(j.data); }); };
     if (url.indexOf(PUBLIC_BASE()) === 0) return loadImg(url + (url.indexOf("?") < 0 ? "?" : "&") + "cors=1", true).catch(viaBackend);
     return viaBackend();
+  }
+  // PDF links end in ?v=<time made>; GitHub Pages takes ~1 minute to serve a new file (404 until then)
+  function pdfFresh(url) {
+    var m = /[?&]v=([a-z0-9]+)/.exec(url || ""); if (!m) return false;
+    var t = parseInt(m[1], 36); return t > 0 && Date.now() - t < 90000;
   }
   function formSuite() {
     return { building: $("s-building").value, suite: $("s-suite").value.trim(),
