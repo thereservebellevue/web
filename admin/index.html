@@ -86,6 +86,14 @@
   .pill { display: inline-block; font-size: 11px; text-transform: uppercase; letter-spacing: .075em; font-weight: 700; padding: 3px 8px; border: 1px solid; }
   .pill.on { color: var(--ok); border-color: var(--ok); }
   .pill.offp { color: var(--muted); border-color: var(--line); }
+  .pill.ready { color: var(--gold-dark); border-color: var(--gold); background: #f4ecdc; }
+  .type-campus { color: var(--muted); font-size: 13px; }
+  .bgrid { background: var(--paper); padding: 8px 18px 4px; max-width: 640px; }
+  .brow { display: grid; grid-template-columns: 56px 1fr; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .brow:last-child { border-bottom: 0; }
+  .brow .num { font-weight: 700; font-size: 18px; color: var(--gold-dark); font-variant-numeric: tabular-nums; }
+  .brow input.changed { border-color: var(--gold); background: #fffaf0; }
+  .intro { color: var(--muted); max-width: 640px; margin: -4px 0 16px; }
   .act { white-space: nowrap; text-align: right; }
   .act .link + .link { margin-left: 14px; }
   .act .link.del { color: var(--warn); }
@@ -126,7 +134,7 @@
     .grid td.c-b { display: block; font-weight: 700; }
     .grid td.c-sf::before, .grid td.c-fl:not(:empty)::before { content: " · "; color: var(--muted); }
     .grid td.c-f { position: absolute; top: 12px; right: 14px; }
-    .grid td.c-on { display: block; margin-top: 6px; }
+    .grid td.c-on, .grid td.c-t { display: inline-block; margin: 6px 8px 0 0; }
     .grid td.act { display: block; text-align: left; padding-top: 8px; }
   }
 </style>
@@ -172,6 +180,7 @@
   <nav class="tabs" aria-label="Sections">
     <div class="wrap" role="tablist">
       <button role="tab" aria-selected="true" data-tab="availability">Availability</button>
+      <button role="tab" aria-selected="false" data-tab="buildings">Buildings</button>
       <button role="tab" aria-selected="false" data-tab="history">History</button>
       <button role="tab" disabled title="Coming soon">Campus Map</button>
       <button role="tab" disabled title="Coming soon">Amenities</button>
@@ -191,14 +200,21 @@
           <h2>Availability <span class="count" id="count"></span></h2>
           <div class="filters">
             <select id="filter-b" aria-label="Filter by building"><option value="">All buildings</option></select>
+            <select id="filter-t" aria-label="Filter by space type"><option value="">All types</option></select>
             <button class="btn" id="b-add">+ Add suite</button>
           </div>
         </div>
         <table class="grid">
-          <thead><tr><th>Building</th><th>Suite</th><th>Size</th><th>Floor</th><th>Floorplan</th><th>On website</th><th></th></tr></thead>
+          <thead><tr><th>Building</th><th>Suite</th><th>Size</th><th>Floor</th><th>Type</th><th>Floorplan</th><th>On website</th><th></th></tr></thead>
           <tbody id="rows"></tbody>
         </table>
         <div class="empty" id="empty" hidden>No suites yet. Click “+ Add suite” to add one.</div>
+      </section>
+
+      <section id="tab-buildings" hidden>
+        <div class="toolbar"><h2>Buildings</h2><button class="btn" id="b-save-b" disabled>Save names</button></div>
+        <p class="intro">Building numbers match the site plan and never change. Rename a building here and it updates everywhere in the editor; click <b>Publish</b> to update the website.</p>
+        <form class="bgrid" id="f-buildings"></form>
       </section>
 
       <section id="tab-history" hidden>
@@ -220,6 +236,8 @@
         <label class="f"><span>Size (SF)</span><input type="text" id="s-sf" inputmode="numeric" placeholder="e.g. 2450" required></label>
         <label class="f"><span>Floor</span><input type="text" id="s-floor" placeholder="e.g. 2nd Floor"></label>
       </div>
+      <label class="f"><span>Space type</span><select id="s-type"></select>
+        <div class="hint">Reserve Ready Suites get a ★ callout on the website.</div></label>
       <div class="f">
         <label for="s-file" style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.075em;font-weight:700;color:var(--gold-dark);margin-bottom:6px">Floorplan</label>
         <div class="drop" id="drop" tabindex="0">
@@ -273,7 +291,8 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
 
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var state = { token: null, me: null, suites: [], buildings: [], status: {}, editing: null, publicBase: "" };
+  var state = { token: null, me: null, suites: [], buildings: [], status: {}, editing: null, publicBase: "", types: [] };
+  var READY = "Reserve Ready Suite";
   function PUBLIC_BASE() { return state.publicBase || "https://thereservebellevue.github.io/web/"; }
   var SKEY = "reserve-editor-session";
 
@@ -348,7 +367,8 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   function refresh() {
     return api("load").then(function (j) {
       state.suites = j.suites; state.buildings = j.buildings; state.status = j.status; state.publicBase = j.publicBase;
-      fillBuildingSelects(); renderRows(); renderStatus();
+      state.types = j.types || ["Campus Availability", READY];
+      fillBuildingSelects(); fillTypeSelects(); renderRows(); renderStatus(); renderBuildings();
     }).catch(function (err) { toast(err.message, true); });
   }
   function fillBuildingSelects() {
@@ -359,6 +379,13 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
     state.buildings.forEach(function (b) { s.appendChild(new Option(pad(b.number) + " " + b.name, b.number)); });
   }
   $("filter-b").addEventListener("change", renderRows);
+  $("filter-t").addEventListener("change", renderRows);
+  function fillTypeSelects() {
+    var f = $("filter-t"), keep = f.value; f.length = 1;
+    state.types.forEach(function (t) { f.appendChild(new Option(t, t)); }); f.value = keep;
+    var s = $("s-type"); s.length = 0;
+    state.types.forEach(function (t) { s.appendChild(new Option(t === READY ? "★ " + t : t, t)); });
+  }
 
   function renderStatus() {
     var st = state.status, p = $("pubstate"); p.innerHTML = "";
@@ -373,8 +400,8 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   }
 
   function renderRows() {
-    var fb = $("filter-b").value, tb = $("rows"); tb.innerHTML = "";
-    var list = state.suites.filter(function (s) { return !fb || String(s.building) === fb; })
+    var fb = $("filter-b").value, ft = $("filter-t").value, tb = $("rows"); tb.innerHTML = "";
+    var list = state.suites.filter(function (s) { return (!fb || String(s.building) === fb) && (!ft || s.type === ft); })
       .sort(function (a, b) { return (a.building - b.building) || String(a.suite).localeCompare(String(b.suite), "en", { numeric: true }); });
     $("count").textContent = "(" + list.length + ")";
     $("empty").hidden = list.length > 0;
@@ -384,6 +411,10 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
       tr.appendChild(el("td", "c-s", "Suite " + s.suite));
       tr.appendChild(el("td", "c-sf", fmtSF(s.sf)));
       tr.appendChild(el("td", "c-fl", s.floor));
+      var tt = el("td", "c-t");
+      if (s.type === READY) tt.appendChild(el("span", "pill ready", "★ Reserve Ready"));
+      else tt.appendChild(el("span", "type-campus", "Campus"));
+      tr.appendChild(tt);
       var tf = el("td", "c-f");
       if (s.floorplan) {
         var th = el("button", "thumb"); th.type = "button"; th.title = "View floorplan";
@@ -429,6 +460,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
     $("s-building").value = s ? s.building : ($("filter-b").value || "");
     $("s-suite").value = s ? s.suite : ""; $("s-sf").value = s ? s.sf : ""; $("s-floor").value = s ? s.floor : "";
     $("s-notes").value = s ? s.notes : ""; $("s-show").checked = s ? s.show : true;
+    $("s-type").value = s ? s.type : ($("filter-t").value || state.types[0]);
     plan = s ? s.floorplan : ""; setPlanPreview(plan);
     $("e-suite").hidden = true; open("dlg-edit");
   }
@@ -440,7 +472,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
     if (uploading) { $("e-suite").textContent = "Wait for the floorplan to finish uploading."; $("e-suite").hidden = false; return; }
     var s = state.editing || {}, b = $("b-save"); $("e-suite").hidden = true; busy(b, true, "Saving…");
     api("saveSuite", { suite: { id: s.id, building: $("s-building").value, suite: $("s-suite").value, sf: $("s-sf").value,
-      floor: $("s-floor").value, floorplan: plan, pdf: s.pdf || "", notes: $("s-notes").value, show: $("s-show").checked } })
+      floor: $("s-floor").value, type: $("s-type").value, floorplan: plan, pdf: s.pdf || "", notes: $("s-notes").value, show: $("s-show").checked } })
       .then(function (j) { state.status = j.status; close("dlg-edit"); toast("Saved. Click Publish when you're ready for it to go live."); return refresh(); })
       .catch(function (err) { $("e-suite").textContent = err.message; $("e-suite").hidden = false; })
       .then(function () { busy(b, false); });
@@ -503,12 +535,43 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
       .catch(function (err) { toast(err.message, true); }).then(function () { busy(b, false); renderStatus(); });
   });
 
+  /* ---------- building names ---------- */
+  function renderBuildings() {
+    var f = $("f-buildings"); f.innerHTML = "";
+    state.buildings.forEach(function (b) {
+      var row = el("label", "brow");
+      row.appendChild(el("span", "num", pad(b.number)));
+      var inp = el("input"); inp.type = "text"; inp.value = b.name; inp.maxLength = 40;
+      inp.dataset.n = b.number; inp.dataset.orig = b.name; inp.setAttribute("aria-label", "Name for building " + pad(b.number));
+      inp.addEventListener("input", markBuildings);
+      row.appendChild(inp); f.appendChild(row);
+    });
+    markBuildings();
+  }
+  function markBuildings() {
+    var any = false;
+    $("f-buildings").querySelectorAll("input").forEach(function (i) {
+      var ch = i.value.trim() !== i.dataset.orig; i.classList.toggle("changed", ch); any = any || ch;
+    });
+    $("b-save-b").disabled = !any;
+  }
+  $("f-buildings").addEventListener("submit", function (e) { e.preventDefault(); $("b-save-b").click(); });
+  $("b-save-b").addEventListener("click", function () {
+    var b = $("b-save-b"), list = [];
+    $("f-buildings").querySelectorAll("input").forEach(function (i) { list.push({ number: Number(i.dataset.n), name: i.value }); });
+    busy(b, true, "Saving…");
+    api("saveBuildings", { buildings: list }).then(function (j) {
+      state.buildings = j.buildings; state.status = j.status;
+      renderBuildings(); fillBuildingSelects(); renderRows(); renderStatus();
+      toast(j.changed ? "Names saved. Publish to update the website." : "No changes to save.");
+    }).catch(function (err) { toast(err.message, true); }).then(function () { busy(b, false); markBuildings(); });
+  });
+
   /* ---------- tabs + history ---------- */
   document.querySelectorAll("[data-tab]").forEach(function (t) {
     t.addEventListener("click", function () {
       document.querySelectorAll("[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", x === t); });
-      $("tab-availability").hidden = t.dataset.tab !== "availability";
-      $("tab-history").hidden = t.dataset.tab !== "history";
+      ["availability", "buildings", "history"].forEach(function (k) { $("tab-" + k).hidden = t.dataset.tab !== k; });
       if (t.dataset.tab === "history") loadHistory(); else refresh();
     });
   });
