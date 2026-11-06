@@ -920,7 +920,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
       var tf = el("td", "c-f");
       if (s.floorplan) {
         var th = el("button", "thumb"); th.type = "button"; th.title = "View floorplan";
-        var im = new Image(); im.alt = ""; im.loading = "lazy"; im.src = s.floorplan;
+        var im = new Image(); im.alt = ""; im.loading = "lazy"; im.src = planData[s.floorplan] || s.floorplan;   // just-uploaded plans show right away
         im.onerror = function () {
           var fresh = s.floorplan.indexOf(PUBLIC_BASE()) === 0;
           th.textContent = fresh ? "Processing…" : "Can't load";
@@ -944,7 +944,12 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
           fp.appendChild(mk);
         }
         tf.appendChild(fp);
-      } else tf.appendChild(el("span", "hint", "None"));
+      } else {
+        // no floorplan yet: one-click upload right from the list
+        var add = el("button", "pdfl make", "+ Floorplan"); add.type = "button"; add.title = "Add a floorplan image (PNG or JPG)";
+        add.addEventListener("click", function () { quickPlan(s, add); });
+        tf.appendChild(add);
+      }
       tr.appendChild(tf);
       var to = el("td", "c-on"); to.appendChild(el("span", "pill " + (s.show ? "on" : "offp"), s.show ? "Shown" : "Hidden")); tr.appendChild(to);
       var ta = el("td", "act");
@@ -996,6 +1001,32 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   $("b-add").addEventListener("click", function () { editSuite(null); });
   function syncRR() { $("rrbox").classList.toggle("on", $("s-ready").checked); }
   $("s-ready").addEventListener("change", syncRR);
+
+  // one-click floorplan upload from the list: upload, save, then make the PDF
+  function quickPlan(s, btn) {
+    var fi = document.createElement("input"); fi.type = "file"; fi.accept = "image/png,image/jpeg";
+    fi.addEventListener("change", function () {
+      var f = fi.files[0]; if (!f) return;
+      if (!/^image\/(png|jpeg)$/.test(f.type)) { toast("Please choose a PNG or JPG image.", true); return; }
+      btn.disabled = true; btn.textContent = "Uploading\u2026";
+      var url;
+      shrink(f).then(function (out) {
+        return api("upload", { file: { name: f.name, mime: out.mime, data: out.dataUrl } }).then(function (j) { url = j.url; planData[url] = out.dataUrl; });
+      }).then(function () {
+        btn.textContent = "Saving\u2026";
+        return api("saveSuite", { suite: { id: s.id, building: s.building, suite: s.suite, sf: s.sf, floor: s.floor, type: s.type,
+          floorplan: url, pdf: s.pdf, notes: s.notes, show: s.show } });
+      }).then(function (j) {
+        if (j.status) state.status = j.status;
+        btn.textContent = "Making PDF\u2026";
+        var x = Object.assign({}, s, { floorplan: url });
+        return makePdf(x).then(function () { toast("Floorplan added and PDF made. Publish to update the website."); },
+                               function (err) { toast("Floorplan added, but the PDF couldn't be made: " + err.message, true); });
+      }).catch(function (err) { toast(err.message || "Upload failed.", true); })
+        .then(function () { return refresh(); });
+    });
+    fi.click();
+  }
 
   // one-click Reserve Ready on/off from the list
   function quickReady(s, cb, sw) {
