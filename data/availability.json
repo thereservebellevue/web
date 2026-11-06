@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-06T19:31:27.079Z",
+  "updated": "2026-11-06T19:52:13.756Z",
   "buildings": {
     "1": "Gateway 112",
     "2": "Primrose",
@@ -287,8 +287,8 @@
       "floor": "2nd Floor",
       "type": "Campus Availability",
       "ready": false,
-      "floorplan": "",
-      "pdf": ""
+      "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/madrona-208-210-new-3x-mw5djrsd.png",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-208-210.pdf?v=mw5dl9b0"
     },
     {
       "building": 5,
