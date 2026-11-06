@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-06T19:23:30.526Z",
+  "updated": "2026-11-06T19:31:28.689Z",
   "intro": {
     "title": "Explore the Campus",
     "text": "Click a building or anything in the map key to learn more."
@@ -14,35 +14,35 @@
     },
     "trails": {
       "text": "",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/campus/264774-31e-edited-mw5d64h6.jpg",
       "show": true,
       "clickable": true,
       "name": "Trails"
     },
     "water": {
       "text": "",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/campus/img-3313-edited1-mw5d6n4o.jpg",
       "show": true,
       "clickable": true,
       "name": "Water"
     },
     "greenspace": {
       "text": "",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/campus/264774-34e-edited-mw5da172.jpg",
       "show": true,
       "clickable": true,
       "name": "Greenspace"
     },
     "parks": {
       "text": "",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/campus/264774-13e-edited-mw5d94vw.jpg",
       "show": true,
       "clickable": true,
       "name": "Park & Seating Areas"
     },
     "foodtrucks": {
       "text": "",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/campus/bop-foodtruck-1-1500x600-mw5dc59e.jpg",
       "show": true,
       "clickable": true,
       "name": "Food Truck Locations"
@@ -70,7 +70,7 @@
     },
     "cafe": {
       "text": "",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/campus/15071-0656p-mw5ddssp.jpg",
       "show": true,
       "clickable": true,
       "name": "Cafe"
