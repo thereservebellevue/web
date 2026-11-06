@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-06T19:31:32.349Z",
+  "updated": "2026-11-06T19:52:19.660Z",
   "intro": {
     "title": "Tenant Portal",
     "text": "Everything for The Reserve's tenants in one place: what's happening on campus, amenities, forms and who to contact."
@@ -55,7 +55,7 @@
       "note": "",
       "hours": "Weekdays, 11:00 AM - 2:00 PM",
       "text": "Local food trucks serve lunch at Gateway 112 (11201 SE 8th St).",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/tenant/bop-foodtruck-3-mw5e4748.jpg",
       "buttons": [
         {
           "label": "Monthly schedule",
@@ -131,7 +131,7 @@
       "note": "Back Summer 2027",
       "hours": "",
       "text": "Paddle the campus waterways. Submit the equipment share application and waiver, then email Gabbie for approval.",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/tenant/bop-kayak-4-mw5e4y5v.jpg",
       "buttons": [
         {
           "label": "Application + waiver",
