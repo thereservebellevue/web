@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-06T18:20:32.417Z",
+  "updated": "2026-11-06T19:23:28.869Z",
   "buildings": {
     "1": "Gateway 112",
     "2": "Primrose",
@@ -57,8 +57,8 @@
       "floor": "2nd Floor",
       "type": "Reserve Ready Suite",
       "ready": true,
-      "floorplan": "https://cbre.box.com/shared/static/b3502btozrcfyeo7h8jcusldyvkdrzzu.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Gateway-112-Suite-210.pdf?v=mw4xjvh9"
+      "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/gatewat-210-new-3x-mw5ctklb.png",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Gateway-112-Suite-210.pdf?v=mw5cxjav"
     },
     {
       "building": 5,
@@ -207,8 +207,8 @@
       "floor": "2nd Floor",
       "type": "Campus Availability",
       "ready": false,
-      "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/cypress-fl1-3x-mw59wkyb.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Cypress-Suite-100.pdf?v=mw59x07y"
+      "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/cypress-fl1-3x-mw5cur5z.png",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Cypress-Suite-100.pdf?v=mw5cvo9b"
     },
     {
       "building": 1,
@@ -217,8 +217,8 @@
       "floor": "1st Floor",
       "type": "Campus Availability",
       "ready": false,
-      "floorplan": "",
-      "pdf": ""
+      "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/screenshot-2026-11-06-at-11-11-51-am-mw5cqp19.png",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Gateway-112-Suite-100.pdf?v=mw5cwb4i"
     },
     {
       "building": 1,
@@ -227,8 +227,8 @@
       "floor": "1st Floor",
       "type": "Campus Availability",
       "ready": false,
-      "floorplan": "",
-      "pdf": ""
+      "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/gateway-110-new-3x-mw5crwbp.png",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Gateway-112-Suite-110.pdf?v=mw5cww2l"
     },
     {
       "building": 5,
@@ -237,8 +237,8 @@
       "floor": "1st Floor",
       "type": "Campus Availability",
       "ready": false,
-      "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/madrona-101-3x-mw59xf57.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-101.pdf?v=mw59xttj"
+      "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/madrona-101-new-3x-mw5buiom.png",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-101.pdf?v=mw5cyjez"
     },
     {
       "building": 5,
@@ -248,7 +248,7 @@
       "type": "Campus Availability",
       "ready": false,
       "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/madrona-102-3x-mw4x9lzv.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-102.pdf?v=mw4xk1ga"
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-102.pdf?v=mw5czcl3"
     },
     {
       "building": 5,
@@ -257,8 +257,8 @@
       "floor": "1st Floor",
       "type": "Campus Availability",
       "ready": false,
-      "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/madrona-106-3x-mw59yvce.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-106.pdf?v=mw59zahf"
+      "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/madrona-106-new-3x-mw5d0mf1.png",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-106.pdf?v=mw5d17ez"
     },
     {
       "building": 5,
@@ -267,8 +267,8 @@
       "floor": "2nd Floor",
       "type": "Campus Availability",
       "ready": false,
-      "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/madrona-200-3x-mw5a3bnh.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-200.pdf?v=mw5a3rr9"
+      "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/madrona-200-new-3x-mw5d32k4.png",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-200.pdf?v=mw5d3gke"
     },
     {
       "building": 5,
@@ -277,8 +277,8 @@
       "floor": "2nd Floor",
       "type": "Campus Availability",
       "ready": false,
-      "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/madrona-208-3x-mw5a45i5.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-208.pdf?v=mw5a4q61"
+      "floorplan": "",
+      "pdf": ""
     },
     {
       "building": 5,
