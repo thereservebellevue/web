@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Healthpeak Space Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
+<style>
+  /* Layout: a scrolling meeting deck. Cream title band, then one full-width section per step with a
+     sticky step nav; option pairs sit side by side and stack on phones. Brand: gold, ink, cream. */
+  :root {
+    --gold: #a39068; --gold-deep: #85744f; --gold-wash: #f4efe4;
+    --ink: #333536; --ink-soft: #5d6061; --cream: #f0ece6; --paper: #faf8f5; --line: #d9d2c6;
+    --plus: #3f7a52; --minus: #a1483c; --mixed: #85744f;
+    --display: "freight-neo-pro", "Figtree", "Helvetica Neue", Arial, sans-serif;
+    --body: "avenir-next-lt-pro", "Avenir Next", "Nunito Sans", "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { background: #fff; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { margin: 0; background: #fff; color: var(--ink); font: 17px/1.55 var(--body); }
+  .wrap { max-width: 1180px; margin-inline: auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+  .eyebrow { margin: 0 0 10px; font-size: .78rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--gold-deep); }
+  h1, h2, h3 { font-family: var(--display); font-weight: 500; text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(2.2rem, 1.5rem + 3vw, 3.8rem); line-height: 1.04; }
+  h2 { font-size: clamp(1.7rem, 1.3rem + 1.6vw, 2.5rem); line-height: 1.1; }
+  h3 { font-size: 1.35rem; line-height: 1.2; }
+  p { margin: 0; }
+  .lede { margin-top: 14px; max-width: 60ch; font-size: 1.12rem; color: var(--ink-soft); }
+
+  /* Title band */
+  .title { background: var(--cream); border-bottom: 1px solid var(--line); }
+  .title .wrap { padding-block: 64px 52px; }
+
+  /* Step nav */
+  .steps-nav { position: sticky; top: 0; z-index: 5; background: rgba(255,255,255,.94); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+  .steps-nav ol { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px; overflow-x: auto; }
+  .steps-nav a { display: block; padding: 14px 14px 12px; color: var(--ink-soft); text-decoration: none; font-size: .88rem; font-weight: 600; white-space: nowrap; border-bottom: 3px solid transparent; }
+  .steps-nav a:hover, .steps-nav a.is-here { color: var(--ink); border-bottom-color: var(--gold); }
+  .steps-nav a:focus-visible { outline: 3px solid var(--gold); outline-offset: -3px; }
+
+  section { scroll-margin-top: 56px; border-bottom: 1px solid var(--line); }
+  section > .wrap { padding-block: 64px; display: grid; gap: 28px; }
+  .step-head { display: grid; grid-template-columns: auto 1fr; gap: 6px 20px; align-items: baseline; }
+  .step-num { grid-row: span 2; font: 500 3.4rem/1 var(--display); color: var(--gold); min-width: 1.2ch; }
+  .step-head .lede { margin-top: 4px; grid-column: 2; }
+  @media (max-width: 600px) { .step-num { font-size: 2.4rem; } }
+
+  /* Comparison table */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+  table.compare { width: 100%; min-width: 820px; table-layout: fixed; border-collapse: collapse; font-size: .95rem; }
+  .compare th, .compare td { padding: 14px 16px; text-align: left; vertical-align: top; border-bottom: 1px solid #ebe6dd; }
+  .compare thead th { background: var(--ink); color: #fff; font-family: var(--display); font-weight: 500; font-size: 1.05rem; }
+  .compare thead th:first-child { width: 150px; }
+  .compare tbody th { width: 150px; background: var(--paper); font-weight: 700; font-size: .85rem; letter-spacing: .02em; }
+  .compare tr:last-child th, .compare tr:last-child td { border-bottom: 0; }
+  .fine { font-size: .82rem; color: var(--ink-soft); }
+
+  /* Step 1 sample sheet */
+  .sheet-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+  table.sheet { width: 100%; min-width: 760px; border-collapse: collapse; font-size: .86rem; font-variant-numeric: tabular-nums; }
+  .sheet th, .sheet td { padding: 9px 12px; border-right: 1px solid #ebe6dd; border-bottom: 1px solid #ebe6dd; white-space: nowrap; text-align: left; }
+  .sheet thead th { background: #eef0ec; font-weight: 700; font-size: .78rem; color: var(--ink-soft); }
+  .sheet td.num { text-align: right; }
+  .sheet .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .74rem; font-weight: 700; }
+  .pill.avail { background: var(--gold-wash); color: var(--gold-deep); }
+  .pill.leased { background: #eeeeec; color: var(--ink-soft); }
+  .checklist { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0; padding: 0; list-style: none; font-size: .95rem; color: var(--ink-soft); }
+  .checklist li::before { content: "✓"; margin-right: 8px; color: var(--plus); font-weight: 700; }
+
+  /* Option pairs */
+  .options { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 860px) { .options { grid-template-columns: 1fr 1fr; } }
+  .option { display: grid; gap: 14px; align-content: start; padding: 26px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+  .tag { justify-self: start; padding: 4px 10px; border-radius: 999px; background: var(--cream); color: var(--ink); font-size: .74rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .option > p { color: var(--ink-soft); }
+  .pc { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 9px; }
+  .pc li { display: grid; grid-template-columns: 26px 1fr; gap: 8px; align-items: baseline; font-size: .97rem; }
+  .pc li::before { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-weight: 700; font-size: .9rem; line-height: 1; color: #fff; transform: translateY(3px); }
+  .pc .plus::before { content: "+"; background: var(--plus); }
+  .pc .minus::before { content: "−"; background: var(--minus); }
+  .pc .mixed::before { content: "±"; background: var(--mixed); }
+
+  /* Live embed */
+  .demo { display: grid; gap: 12px; }
+  .demo-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 20px; }
+  .demo-head a { color: var(--gold-deep); font-weight: 600; font-size: .92rem; }
+  .demo-frame { padding: 20px; border: 1px dashed var(--line); border-radius: 10px; background: #fff; }
+  .demo-frame iframe { display: block; width: 100%; height: 760px; border: 0; }
+
+  /* Chat simulation */
+  .chat-row { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 900px) { .chat-row { grid-template-columns: minmax(0, 1fr) 420px; } }
+  .chat-notes { display: grid; gap: 16px; align-content: start; }
+  .chat-notes ol { margin: 0; padding-left: 1.2em; display: grid; gap: 10px; color: var(--ink-soft); }
+  .chat-notes strong { color: var(--ink); }
+  .chat { border-radius: 16px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 18px 40px rgba(51,53,54,.14); background: #fff; display: flex; flex-direction: column; height: 640px; }
+  .chat-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; background: var(--ink); color: #fff; }
+  .chat-top strong { font-family: var(--display); font-weight: 500; font-size: 1.05rem; }
+  .chat-top span { display: block; font-size: .74rem; color: #cfcac2; }
+  .chat-replay { padding: 7px 12px; border: 1px solid #5a5d5e; border-radius: 999px; background: transparent; color: #fff; font: 600 .78rem/1 var(--body); cursor: pointer; }
+  .chat-replay:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .chat-log { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; background: var(--paper); }
+  .msg { max-width: 86%; padding: 10px 13px; border-radius: 14px; font-size: .92rem; line-height: 1.45; animation: pop .25s ease-out; }
+  .msg.user { align-self: flex-end; background: var(--ink); color: #fff; border-bottom-right-radius: 4px; }
+  .msg.bot { align-self: flex-start; background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip { padding: 4px 10px; border-radius: 999px; background: var(--gold-wash); color: var(--gold-deep); font-size: .76rem; font-weight: 700; }
+  .choices { align-self: flex-start; display: flex; flex-wrap: wrap; gap: 6px; max-width: 95%; animation: pop .25s ease-out; }
+  .choices button { padding: 9px 13px; border: 1px solid var(--gold); border-radius: 999px; background: #fff; color: var(--ink); font: 600 .84rem/1.1 var(--body); cursor: pointer; }
+  .choices button:hover { background: var(--gold-wash); }
+  .choices button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .choices button:disabled { cursor: default; opacity: .45; }
+  .choices button.is-picked { opacity: 1; background: var(--gold); border-color: var(--gold); color: #fff; }
+  .result { display: grid; gap: 4px; margin-top: 8px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); }
+  .result b { font-size: .92rem; }
+  .result span { font-size: .8rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .result a { font-size: .8rem; font-weight: 700; color: var(--gold-deep); text-decoration: none; }
+  .typing { align-self: flex-start; display: flex; gap: 4px; padding: 12px 14px; border-radius: 14px; background: #fff; border: 1px solid var(--line); }
+  .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: blink 1s infinite; }
+  .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+  .chat-input { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--line); background: #fff; }
+  .chat-input div { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 999px; color: #9a9893; font-size: .88rem; }
+  .chat-input span { display: grid; place-items: center; width: 40px; border-radius: 50%; background: var(--gold); color: #fff; font-weight: 700; }
+  @keyframes pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes blink { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .msg, .choices { animation: none; } .typing i { animation: none; opacity: .7; } }
+
+  /* Recommendation */
+  .rec { background: var(--ink); color: #fff; border-bottom: 0; }
+  .rec .eyebrow { color: var(--gold); }
+  .rec .lede { color: #d9d6d1; }
+  .phases { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); counter-reset: phase; }
+  @media (min-width: 860px) { .phases { grid-template-columns: repeat(3, 1fr); } }
+  .phases li { counter-increment: phase; position: relative; padding: 22px; border: 1px solid #4a4d4e; border-radius: 10px; background: #3b3d3e; display: grid; gap: 8px; align-content: start; }
+  .phases h3 { font-size: 1.15rem; }
+  .phases p { color: #d9d6d1; font-size: .95rem; }
+  .phases .when { font-size: .74rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #bdb7ad; }
+  .wins { display: flex; flex-wrap: wrap; gap: 10px; }
+  .wins span { padding: 10px 16px; border-radius: 999px; background: var(--gold); color: #fff; font-weight: 700; }
+  .rec .fine { color: #bdb7ad; }
+  footer .wrap { padding-block: 22px 32px; font-size: .82rem; color: var(--ink-soft); }
+  /* Sample-data notice */
+  .sample-note { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start; padding: 18px 20px; border: 2px solid #c9a24a; border-radius: 10px; background: #fff8e8; }
+  .sample-note .bang { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #c9a24a; color: #fff; font: 800 1.15rem/1 var(--body); }
+  .sample-note strong { display: block; font-size: 1.02rem; margin-bottom: 2px; }
+  .sample-note p { font-size: .95rem; color: var(--ink-soft); }
+  .sample-note.is-small { padding: 10px 14px; gap: 10px; align-items: center; border-width: 1.5px; }
+  .sample-note.is-small .bang { width: 24px; height: 24px; font-size: .9rem; }
+  .sample-note.is-small p { font-size: .86rem; }
+  .sample-band .wrap { padding-block: 26px 0; }
+
+  /* Where an update goes */
+  .flow { display: grid; gap: 10px; padding: 16px; border-radius: 8px; background: #fff; border: 1px solid #e6e0d5; }
+  .flow-title { font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+  .flow-row { display: grid; grid-template-columns: minmax(0, 150px) 26px minmax(0, 1fr); gap: 8px; align-items: center; }
+  .flow-src { padding: 9px 10px; border-radius: 6px; background: var(--ink); color: #fff; font-size: .82rem; font-weight: 700; text-align: center; line-height: 1.25; }
+  .flow-src.is-hand { background: #fff; color: var(--ink); border: 1.5px dashed #a9a59e; }
+  .flow-arrow { text-align: center; color: var(--ink-soft); font-weight: 700; }
+  .flow-outs { display: grid; gap: 6px; }
+  .flow-out { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 7px 10px; border-radius: 6px; border: 1px solid #e6e0d5; background: var(--paper); font-size: .85rem; }
+  .flow-out em { flex: none; font-style: normal; font-size: .7rem; font-weight: 700; letter-spacing: .04em; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+  .em-auto { background: #e5efe7; color: var(--plus); }
+  .em-hand { background: #f6e7e4; color: var(--minus); }
+  @media (max-width: 520px) { .flow-row { grid-template-columns: 1fr; } .flow-arrow { transform: rotate(90deg); } }
+
+  /* Live "change one entry" demo */
+  .live { display: grid; gap: 18px; padding: 26px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+  .live-top { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 900px) { .live-top { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
+  .wp-card { border: 1px solid #c3c4c7; border-radius: 4px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.06); font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wp-card header { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid #dcdcde; background: #f6f7f7; font-size: .82rem; color: #50575e; }
+  .wp-card header b { color: #1d2327; font-weight: 600; }
+  .wp-body { display: grid; gap: 12px; padding: 14px; }
+  .wp-field { display: grid; gap: 5px; }
+  .wp-field label, .wp-field .lbl { font-size: .8rem; font-weight: 600; color: #1d2327; }
+  .wp-field select { width: 100%; padding: 8px 10px; border: 1px solid #8c8f94; border-radius: 4px; background: #fff; font: inherit; font-size: .9rem; color: #1d2327; }
+  .seg { justify-self: start; display: inline-flex; border: 1px solid #8c8f94; border-radius: 4px; overflow: hidden; }
+  .seg button { padding: 8px 16px; border: 0; background: #fff; color: #1d2327; font: 600 .86rem/1 inherit; font-family: inherit; cursor: pointer; }
+  .seg button + button { border-left: 1px solid #8c8f94; }
+  .seg button[aria-pressed="true"] { background: #2271b1; color: #fff; }
+  .wp-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 480px) { .wp-grid { grid-template-columns: minmax(0, 1fr); } }
+  .wp-field input[type="number"] { width: 100%; padding: 8px 10px; border: 1px solid #8c8f94; border-radius: 4px; font: inherit; font-size: .9rem; color: #1d2327; font-variant-numeric: tabular-nums; }
+  .wp-field input[type="number"]:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .wp-checks { display: flex; flex-wrap: wrap; gap: 6px 16px; padding-top: 6px; }
+  .wp-checks label { display: flex; gap: 6px; align-items: center; font-size: .88rem; color: #1d2327; cursor: pointer; }
+  .wp-checks input { width: 16px; height: 16px; accent-color: #2271b1; }
+  .wp-actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+  .wp-update { padding: 9px 16px; border: 0; border-radius: 4px; background: #2271b1; color: #fff; font: 600 .88rem/1 inherit; font-family: inherit; cursor: pointer; }
+  .wp-reset { padding: 0; border: 0; background: none; color: #2271b1; font: .82rem/1 inherit; font-family: inherit; text-decoration: underline; cursor: pointer; }
+  .wp-update:focus-visible, .wp-reset:focus-visible, .seg button:focus-visible, .wp-field select:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .ripple { display: grid; gap: 8px; align-content: start; }
+  .ripple h4 { margin: 0; font: 500 1.1rem/1.2 var(--display); }
+  .ripple ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .ripple li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: #fff; font-size: .9rem; transition: background .4s ease, border-color .4s ease; }
+  .ripple li i { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #e7e4de; color: var(--ink-soft); font-style: normal; font-size: .78rem; font-weight: 700; transition: background .4s ease, color .4s ease; }
+  .ripple li span small { display: block; color: var(--ink-soft); font-size: .8rem; }
+  .ripple li.is-done { border-color: #a9c8b1; background: #f1f7f2; }
+  .ripple li.is-done i { background: var(--plus); color: #fff; }
+  .ripple .status { font-size: .86rem; color: var(--ink-soft); min-height: 1.3em; }
+  .live .demo-frame { background: #fff; }
+  @media (prefers-reduced-motion: reduce) { .ripple li, .ripple li i { transition: none; } }
+
+  /* Chat, then filter list */
+  .ui-block { display: grid; gap: 18px; scroll-margin-top: 70px; }
+  .ui-head { margin: 10px 0 0; display: flex; align-items: center; gap: 14px; font: 500 1.35rem/1.2 var(--display); }
+  .ui-head::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  /* Interface tabs */
+  .ui-tabs { display: inline-flex; padding: 4px; border-radius: 999px; background: var(--cream); justify-self: start; }
+  .ui-tabs button { min-height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: transparent; color: var(--ink); font: 600 .92rem/1 var(--body); cursor: pointer; }
+  .ui-tabs button[aria-selected="true"] { background: var(--ink); color: #fff; }
+  .ui-tabs button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+  /* Filter list */
+  .finder { display: grid; gap: 22px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 900px) { .finder { grid-template-columns: 300px minmax(0, 1fr); } }
+  .filters { display: grid; gap: 16px; padding: 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+  .filters fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: 8px; min-width: 0; }
+  .filters legend, .filters .lbl { padding: 0; margin-bottom: 6px; font-size: .74rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+  .range { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
+  .range span { color: var(--ink-soft); font-size: .85rem; }
+  .filters input[type="number"], .filters select { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid #cfc8bb; border-radius: 6px; background: #fff; font: inherit; font-size: .92rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pills button { padding: 7px 12px; border: 1px solid #cfc8bb; border-radius: 999px; background: #fff; color: var(--ink); font: 600 .84rem/1 var(--body); cursor: pointer; }
+  .pills button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .checks { display: grid; gap: 7px; }
+  .checks label { display: flex; gap: 9px; align-items: center; font-size: .92rem; cursor: pointer; }
+  .checks input { width: 17px; height: 17px; accent-color: var(--gold-deep); }
+  .filters input:focus-visible, .filters select:focus-visible, .pills button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .filters .clear { justify-self: start; padding: 0; border: 0; background: none; color: var(--gold-deep); font: 600 .86rem/1 var(--body); text-decoration: underline; cursor: pointer; }
+  .results { display: grid; gap: 12px; min-width: 0; }
+  .results-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; }
+  .results-head h4 { margin: 0; font: 500 1.3rem/1.2 var(--display); }
+  .results-head span { font-size: .86rem; color: var(--ink-soft); }
+  .space { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+  .space h5 { margin: 0; font: 600 1rem/1.3 var(--body); }
+  .space .where { font-size: .82rem; color: var(--ink-soft); }
+  .space .size { grid-row: span 2; text-align: right; font: 500 1.35rem/1.1 var(--display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .space .size small { display: block; font: 600 .7rem/1.4 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+  .space .meta { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .tagx { padding: 3px 9px; border-radius: 999px; background: #efede8; color: var(--ink); font-size: .76rem; font-weight: 600; }
+  .tagx.type-lab { background: #e6eef0; }
+  .tagx.feat { background: var(--gold-wash); color: var(--gold-deep); }
+  .space .links { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 16px; padding-top: 6px; border-top: 1px solid #efebe4; font-size: .84rem; }
+  .space .links a { color: var(--gold-deep); font-weight: 700; text-decoration: none; }
+  .space .links a:hover { text-decoration: underline; }
+  .space .links .muted { color: var(--ink-soft); }
+  .no-match { padding: 26px; border: 1px dashed var(--line); border-radius: 10px; text-align: center; color: var(--ink-soft); }
+  .src-note { font-size: .8rem; color: var(--ink-soft); }
+  .see-all { margin-top: 8px; padding: 7px 12px; border: 1px solid var(--gold); border-radius: 999px; background: #fff; color: var(--gold-deep); font: 700 .8rem/1 var(--body); cursor: pointer; }
+
+</style>
+</head>
+<body>
+
+<header class="title">
+  <div class="wrap">
+    <p class="eyebrow">Healthpeak Bay Area · Availability search</p>
+    <h1>Helping prospects find their space</h1>
+    <p class="lede">Options for a space search on healthpeakbayarea.com, as a chat or a filter list, and the availability data that powers it.</p>
+  </div>
+</header>
+
+<nav class="steps-nav" aria-label="Sections">
+  <div class="wrap">
+    <ol>
+      <li><a href="#options">Options at a glance</a></li>
+      <li><a href="#step-1">1 · Clean data</a></li>
+      <li><a href="#step-2">2 · Using the data</a></li>
+      <li><a href="#step-3">3 · Powering the search</a></li>
+      <li><a href="#recommendation">Recommendation</a></li>
+    </ol>
+  </div>
+</nav>
+
+<main>
+<div class="sample-band"><div class="wrap">
+  <div class="sample-note" role="note"><span class="bang" aria-hidden="true">!</span><div><strong>Sample data only</strong><p>The demos on this page work from a limited sample: 4 spaces at Portside and 6 at Gateway Crossing, taken from the current website. They show how the tools would work, not the full inventory. The finished tool would cover every Healthpeak property and space.</p></div></div>
+</div></div>
+<!-- Options table -->
+<section id="options">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Options at a glance</p>
+      <h2>Three ways to build the search</h2>
+      <p class="lede">The goal: help prospects find a matching space on the site, through a chat, a filter list or both, with optional email capture.</p>
+    </div>
+    <div class="table-scroll">
+      <table class="compare">
+        <thead>
+          <tr><th scope="col"><span class="fine" style="color:#cfcac2">&nbsp;</span></th><th scope="col">AI Engine Pro</th><th scope="col">WPBot Pro</th><th scope="col" class="ours">Custom build (WordPress)</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">What it is</th><td>AI-first toolkit with a chatbot builder</td><td>Rule-based chatbot with AI added</td><td class="ours">A chat-style “find a space” tool built into the site. It reads availability data managed in WordPress, and the same data builds the property-page tables and site plans</td></tr>
+          <tr><th scope="row">Cost, one site</th><td>$69/year, plus $18/year for email add-ons</td><td>$99/year (Professional) to $189/year (Master)</td><td class="ours">No license fee. Built on Advanced Custom Fields (free version)</td></tr>
+          <tr><th scope="row">AI usage</th><td>Billed by AI provider, about $2 to $34 per 1,000 chats by model</td><td>Billed by AI provider, about $2 per 1,000 replies on a small model</td><td class="ours">Not applicable. Requests are read with built-in keyword and synonym matching</td></tr>
+          <tr><th scope="row">Best at</th><td>Typed requests. Can call our own search</td><td>Scripted dropdown and form flows</td><td class="ours">Lab-specific searches: size ranges, vivarium, location, features. Dropdowns, quick-tap buttons and typed requests share one search</td></tr>
+          <tr><th scope="row">Main gap</th><td>Dropdown flow, search and email need custom build</td><td>Spreadsheet filtering unconfirmed. May need Master plan or custom code</td><td class="ours">Can’t read unusual open-ended phrasing; falls back to dropdowns. Needs in-house build time</td></tr>
+          <tr><th scope="row">Track record</th><td>More than 90,000 installs, 4.9 rating</td><td>More than 5,000 installs, 4.7 rating</td><td class="ours">Not applicable. Advanced Custom Fields is one of the most widely used WordPress plugins</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fine">Plugin pricing as reported on vendor pages, October 2026. Confirm before purchase.</p>
+  </div>
+</section>
+
+<!-- Step 1 -->
+<section id="step-1">
+  <div class="wrap">
+    <div class="step-head">
+      <span class="step-num" aria-hidden="true">1</span>
+      <h2>Gather clean, accurate data</h2>
+      <p class="lede">Every option starts here. One spreadsheet with all the public, searchable availability information. Today it lives in page text boxes and brochure PDFs.</p>
+    </div>
+    <div class="sheet-scroll" role="region" aria-label="Sample availability spreadsheet" tabindex="0">
+      <table class="sheet">
+        <thead><tr><th>Property</th><th>Building</th><th>Floor / suite</th><th>RSF</th><th>Status</th><th>Condition</th><th>Vivarium</th><th>Floor plan PDF</th><th>Floor plan image</th></tr></thead>
+        <tbody>
+          <tr><td>Portside</td><td>1140 Veterans Blvd</td><td>1st floor</td><td class="num">21,682</td><td><span class="pill avail">Available</span></td><td>Spec suite</td><td>—</td><td>1140_L1.pdf</td><td>1140_L1.png</td></tr>
+          <tr><td>Portside</td><td>1140 Veterans Blvd</td><td>2nd floor</td><td class="num">27,155</td><td><span class="pill avail">Available</span></td><td>Hypothetical plan</td><td>—</td><td>1140_L2.pdf</td><td>1140_L2.png</td></tr>
+          <tr><td>Portside</td><td>331 Oyster Point Blvd</td><td>2nd floor</td><td class="num">33,333</td><td><span class="pill avail">Available</span></td><td>Shell</td><td>—</td><td>331_L2.pdf</td><td>331_L2.png</td></tr>
+          <tr><td>Portside</td><td>1100 Veterans Blvd</td><td>—</td><td class="num">—</td><td><span class="pill leased">Fully leased</span></td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="checklist">
+      <li>Brokers confirm it’s all public</li>
+      <li>One row per available floor or suite</li>
+      <li>Same columns for every property</li>
+      <li>Floor plans saved as PDF and image</li>
+    </ul>
+    <p class="fine">Sample rows from current Portside availability. Columns will be finalized with the brokers.</p>
+  </div>
+</section>
+
+<!-- Step 2 -->
+<section id="step-2">
+  <div class="wrap">
+    <div class="step-head">
+      <span class="step-num" aria-hidden="true">2</span>
+      <h2>How do we use this data?</h2>
+      <p class="lede">The key difference is what happens when a space changes. Who has to update what, and where?</p>
+    </div>
+    <div class="options">
+      <article class="option">
+        <span class="tag">Option A</span>
+        <h3>Upload the spreadsheet</h3>
+        <p>The spreadsheet is uploaded to WordPress and re-uploaded as availability changes. Property pages are still updated by hand, as today.</p>
+        <div class="flow" aria-label="Option A: where an update goes">
+          <span class="flow-title">When a space leases</span>
+          <div class="flow-row">
+            <span class="flow-src">Edit &amp; re-upload spreadsheet</span><span class="flow-arrow" aria-hidden="true">→</span>
+            <div class="flow-outs"><span class="flow-out">Chat search <em class="em-auto">Updates</em></span></div>
+          </div>
+          <div class="flow-row">
+            <span class="flow-src is-hand">Also edit each property page</span><span class="flow-arrow" aria-hidden="true">→</span>
+            <div class="flow-outs">
+              <span class="flow-out">Availability table <em class="em-hand">By hand</em></span>
+              <span class="flow-out">Site plan / stacking plan <em class="em-hand">By hand</em></span>
+            </div>
+          </div>
+        </div>
+        <ul class="pc">
+          <li class="plus">Fastest to launch</li>
+          <li class="minus">Double the work to maintain: every change is made in the spreadsheet and on the property page</li>
+          <li class="minus">The chat and the property pages can disagree when one gets missed</li>
+        </ul>
+      </article>
+      <article class="option">
+        <span class="tag">Option B</span>
+        <h3>Enter each space once in WordPress</h3>
+        <p>A space is entered once in a WordPress form, with RSF, features, floor plan image and PDF. The site reads that one entry everywhere it’s shown.</p>
+        <div class="flow" aria-label="Option B: where an update goes">
+          <span class="flow-title">When a space leases</span>
+          <div class="flow-row">
+            <span class="flow-src">Change one entry in WordPress</span><span class="flow-arrow" aria-hidden="true">→</span>
+            <div class="flow-outs">
+              <span class="flow-out">Chat or filter search <em class="em-auto">Updates</em></span>
+              <span class="flow-out">Availability table <em class="em-auto">Updates</em></span>
+              <span class="flow-out">Site plan highlight <em class="em-auto">Updates</em></span>
+              <span class="flow-out">Floor plan popup <em class="em-auto">Updates</em></span>
+            </div>
+          </div>
+        </div>
+        <ul class="pc">
+          <li class="minus">Takes time to build at the start</li>
+          <li class="plus">Easy to update and maintain once built</li>
+          <li class="plus">Better experience for visitors and better search results</li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="live" id="try">
+      <div>
+        <p class="eyebrow">Try it · Option B</p>
+        <h3>Change one entry, watch everything update</h3>
+        <p class="lede" style="font-size:1rem">Edit a Portside space the way a broker would in WordPress: change its size, plan type or features, or mark it leased. The property page below and the search in Step 3 both update from that single change. Nobody edits the page by hand.</p>
+      </div>
+      <div class="sample-note is-small" role="note"><span class="bang" aria-hidden="true">!</span><p><strong style="display:inline">Sample data only.</strong> A limited sample of spaces from Portside and Gateway Crossing. Changes here are just for this demo and reset when the page reloads.</p></div>
+      <div class="live-top">
+        <div class="wp-card">
+          <header><b>Edit Availability</b><span>WordPress · sample</span></header>
+          <div class="wp-body">
+            <div class="wp-field">
+              <label for="wp-space">Space</label>
+              <select id="wp-space"></select>
+            </div>
+            <div class="wp-grid">
+              <div class="wp-field">
+                <label for="wp-rsf">Rentable SF</label>
+                <input type="number" id="wp-rsf" inputmode="numeric" min="1000" step="1">
+              </div>
+              <div class="wp-field">
+                <label for="wp-cond">Plan type</label>
+                <select id="wp-cond">
+                  <option>Spec suite</option><option>Hypothetical plan</option><option>Shell</option><option>Full floor opportunity</option>
+                </select>
+              </div>
+              <div class="wp-field">
+                <label for="wp-when">Available</label>
+                <select id="wp-when"><option value="0">Now</option><option value="1">Q2 2027</option><option value="2">Q4 2027</option></select>
+              </div>
+              <div class="wp-field">
+                <span class="lbl">Lab features</span>
+                <div class="wp-checks">
+                  <label><input type="checkbox" id="wp-viv"> Vivarium</label>
+                  <label><input type="checkbox" id="wp-bsl"> BSL-2</label>
+                </div>
+              </div>
+            </div>
+            <div class="wp-field">
+              <span class="lbl" id="wp-status-lbl">Status</span>
+              <div class="seg" role="group" aria-labelledby="wp-status-lbl">
+                <button type="button" id="wp-avail" aria-pressed="true">Available</button>
+                <button type="button" id="wp-leased" aria-pressed="false">Leased</button>
+              </div>
+            </div>
+            <div class="wp-actions">
+              <button type="button" class="wp-update" id="wp-update">Update</button>
+              <button type="button" class="wp-reset" id="wp-reset">Reset sample data</button>
+            </div>
+          </div>
+        </div>
+        <div class="ripple" aria-live="polite">
+          <h4>Where that one change shows up</h4>
+          <ul>
+            <li id="rp-table"><i aria-hidden="true">1</i><span>Property-page availability list<small>Building totals and floors recalculate</small></span></li>
+            <li id="rp-plan"><i aria-hidden="true">2</i><span>Site plan highlight<small>A building with no space left turns off</small></span></li>
+            <li id="rp-search"><i aria-hidden="true">3</i><span>Filter list and chat results<small>See Step 3. The space appears or drops out</small></span></li>
+          </ul>
+          <p class="status" id="rp-status">Pick a space, change anything, then press Update.</p>
+        </div>
+      </div>
+      <div class="demo-frame">
+        <iframe id="hp-portside" src="embed.html?property=portside&amp;views=2d" title="Portside availability prototype: site plan and floor plans" loading="lazy"></iframe>
+      </div>
+      <p class="fine">Above: the Portside property-page embed. Gateway Crossing would get its own site plan the same way. <a href="embed.html?property=portside&amp;views=2d" target="_blank" rel="noopener" style="color:var(--gold-deep)">Open full screen ↗</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- Step 3 -->
+<section id="step-3">
+  <div class="wrap">
+    <div class="step-head">
+      <span class="step-num" aria-hidden="true">3</span>
+      <h2>What powers the search?</h2>
+      <p class="lede">The difference is how a request is understood, and what it searches.</p>
+    </div>
+    <div class="options">
+      <article class="option">
+        <span class="tag">Option A</span>
+        <h3>AI chatbot plugin</h3>
+        <p>AI Engine Pro or WPBot Pro, set up to search our availability data. Built around a chat window.</p>
+        <ul class="pc">
+          <li class="plus">Understands open-ended, conversational requests</li>
+          <li class="plus">Plugin updates maintained by the vendor</li>
+          <li class="minus">Some risk of unexpected or made-up answers unless tightly limited to our data</li>
+          <li class="minus">$70 to $200+ a year in licenses, plus AI usage fees</li>
+          <li class="minus">Needs CBRE approval of the AI vendor and a spending cap</li>
+        </ul>
+      </article>
+      <article class="option">
+        <span class="tag">Option B</span>
+        <h3>Custom build</h3>
+        <p>Custom code running on WordPress, reading the same data as the property pages. Can be a chat, a filter list, or both.</p>
+        <ul class="pc">
+          <li class="plus">Searches the same data that updates the property pages, so results always match</li>
+          <li class="mixed">Reads key words and answers only from the data: always factual, but less conversational</li>
+          <li class="minus">In-house maintenance may be needed down the line</li>
+          <li class="plus">Free: no license or AI usage fees</li>
+        </ul>
+      </article>
+    </div>
+
+    <div>
+      <h3>What a visitor could see</h3>
+      <p class="lede" style="font-size:1rem">The same search can be presented two ways: as a chat, or as a filter list. Both read the same sample data as the property page in Step 2, so a change made there shows up here too.</p>
+    </div>
+    <div class="sample-note is-small" role="note"><span class="bang" aria-hidden="true">!</span><p><strong style="display:inline">Sample data only.</strong> Results come from a limited sample: 4 spaces at Portside and 6 at Gateway Crossing. The finished search would cover every Healthpeak property.</p></div>
+    <!-- Chat -->
+    <div id="panel-chat" class="ui-block" aria-labelledby="h-chat">
+      <h4 class="ui-head" id="h-chat"><span>As a chat</span></h4>
+      <div class="chat-row">
+        <div class="chat-notes">
+          <ol>
+            <li><strong>They ask in their own words.</strong> The search pulls out size and use, shown as tags they can see.</li>
+            <li><strong>If something’s unclear, it asks.</strong> One quick choice instead of a wrong guess. Try both answers.</li>
+            <li><strong>Results come only from the data,</strong> with floor plans one tap away and a hand-off to the leasing team.</li>
+          </ol>
+        </div>
+        <div class="chat" aria-label="Simulated chat">
+          <div class="chat-top">
+            <div><strong>Find your space</strong><span>Healthpeak Bay Area · sample</span></div>
+            <button class="chat-replay" id="replay" type="button">Replay</button>
+          </div>
+          <div class="chat-log" id="log" aria-live="polite"></div>
+          <div class="chat-input" aria-hidden="true"><div>Describe the space you need…</div><span>↑</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter list -->
+    <div id="panel-filter" class="ui-block" aria-labelledby="h-filter">
+      <h4 class="ui-head" id="h-filter"><span>As a filter list</span></h4>
+      <div class="finder">
+        <form class="filters" id="filters" aria-label="Filter available spaces">
+          <fieldset>
+            <legend>Size (RSF)</legend>
+            <div class="range">
+              <input type="number" id="f-min" inputmode="numeric" step="1000" min="0" value="20000" aria-label="Minimum RSF">
+              <span>to</span>
+              <input type="number" id="f-max" inputmode="numeric" step="1000" min="0" value="30000" aria-label="Maximum RSF">
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Space type</legend>
+            <div class="pills" id="f-type">
+              <button type="button" data-v="any" aria-pressed="true">Any</button>
+              <button type="button" data-v="Lab" aria-pressed="false">Lab</button>
+              <button type="button" data-v="Office" aria-pressed="false">Office</button>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Available by</legend>
+            <select id="f-date" aria-label="Available by">
+              <option value="99">Any time</option>
+              <option value="0">Now</option>
+              <option value="1">Q2 2027</option>
+              <option value="2">Q4 2027</option>
+            </select>
+          </fieldset>
+          <fieldset>
+            <legend>Property</legend>
+            <select id="f-prop" aria-label="Property">
+              <option value="any">All properties</option>
+              <option value="Portside">Portside</option>
+              <option value="Gateway Crossing">Gateway Crossing</option>
+            </select>
+          </fieldset>
+          <fieldset>
+            <legend>Minimum power</legend>
+            <select id="f-power" aria-label="Minimum power">
+              <option value="0">Any</option>
+              <option value="2000">2,000 amps +</option>
+              <option value="3000">3,000 amps +</option>
+              <option value="4000">4,000 amps +</option>
+            </select>
+          </fieldset>
+          <fieldset>
+            <legend>Features</legend>
+            <div class="checks">
+              <label><input type="checkbox" value="Spec suite"> Spec suite (move-in ready)</label>
+              <label><input type="checkbox" value="Full floor"> Full floor</label>
+              <label><input type="checkbox" value="Vivarium"> Vivarium</label>
+              <label><input type="checkbox" value="BSL-2"> BSL-2 lab</label>
+            </div>
+          </fieldset>
+          <button type="button" class="clear" id="f-clear">Clear filters</button>
+        </form>
+        <div class="results">
+          <div class="results-head"><h4 id="r-count"></h4><span>Sorted by closest size</span></div>
+          <div id="r-list" class="results" aria-live="polite"></div>
+          <p class="src-note">Sizes, space type, power and floor plans are from the current website. Move-in timing and lab features (vivarium, BSL-2) are placeholder values to show how the filters work.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Recommendation -->
+<section id="recommendation" class="rec">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Recommendation</p>
+      <h2>Launch the chat now, build the foundation alongside it</h2>
+      <p class="lede">Start with an AI chatbot on the spreadsheet so visitors get the chat experience soon. In the background, set up the WordPress data so both work together, and we get the best of both.</p>
+    </div>
+    <ol class="phases">
+      <li>
+        <span class="when">Now</span>
+        <h3>Gather the data</h3>
+        <p>Compile the clean availability spreadsheet from the site and brochures, with the brokers.</p>
+      </li>
+      <li>
+        <span class="when">When the data is ready</span>
+        <h3>Launch the AI chatbot</h3>
+        <p>Purchase the plugin and point it at the spreadsheet. Visitors get the chat experience right away.</p>
+      </li>
+      <li>
+        <span class="when">In the background</span>
+        <h3>Build the WordPress data</h3>
+        <p>Set up the custom fields and property-page embeds. Then switch the chatbot to read the same data, and the spreadsheet retires.</p>
+      </li>
+    </ol>
+    <div class="wins" aria-label="What we get"><span>Clean data</span><span>Easier maintenance</span><span>Smart chat</span></div>
+    <p class="fine">Before the chatbot launches: CBRE approval of the AI vendor, a privacy notice for email capture, a monthly spending cap, and accessibility testing.</p>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">Prepared by CBRE for Healthpeak · Prototype uses sample data · <a href="property-demo.html" style="color:inherit">Full property page demo</a></div></footer>
+
+<script>
+// =================================================================================================
+// One shared SAMPLE data set drives every demo on this page: the "Try it" form, the Portside embed,
+// the filter list and the chat. Sizes, type, power and PDFs are from healthpeakbayarea.com;
+// move-in timing ("when") and lab features are placeholders for the demo.
+// =================================================================================================
+var WHEN = ['Now', 'Q2 2027', 'Q4 2027'];
+var SAMPLE = [
+  { id: 'ps-1140-1', prop: 'Portside', bld: '1140 Veterans Blvd', bid: 1140, floor: 1, rsf: 21682, type: 'Lab', cond: 'Spec suite', feats: ['Spec suite'], amps: 0, power: 'Not listed', when: 0,
+    pdf: 'https://f.tlcollect.com/fr2/325/54769/Portside_1140_Veterans_1st_Floor_Spec_Suite_%284%29.pdf?cbcachex=580262' },
+  { id: 'ps-1140-2', prop: 'Portside', bld: '1140 Veterans Blvd', bid: 1140, floor: 2, rsf: 27155, type: 'Lab', cond: 'Hypothetical plan', feats: ['Vivarium'], amps: 0, power: 'Not listed', when: 1,
+    pdf: 'https://f.tlcollect.com/fr2/225/74226/Portside_1140_Veterans_2nd_Floor_Hypothetical_%281%29.pdf?cbcachex=292354' },
+  { id: 'ps-1140-3', prop: 'Portside', bld: '1140 Veterans Blvd', bid: 1140, floor: 3, rsf: 26953, type: 'Lab', cond: 'Hypothetical plan', feats: ['BSL-2'], amps: 0, power: 'Not listed', when: 1,
+    pdf: 'https://f.tlcollect.com/fr2/025/58756/Portside_1140_Veterans_3rd_Floor_Hypothetical_%281%29.pdf?cbcachex=151685' },
+  { id: 'ps-331-2', prop: 'Portside', bld: '331 Oyster Point Blvd', bid: 331, floor: 2, rsf: 33333, type: 'Lab', cond: 'Shell', feats: ['Vivarium', 'BSL-2'], amps: 0, power: 'Not listed', when: 2,
+    pdf: 'https://f.tlcollect.com/fr2/525/56232/Portside_331_Oyster_Point_2nd_Floor_Shell_%281%29.pdf?cbcachex=869652' },
+  { id: 'gc-651-5', prop: 'Gateway Crossing', bld: '651 Gateway Blvd', floor: 5, rsf: 22654, type: 'Lab', cond: 'Spec suite · two suites', feats: ['Spec suite', 'BSL-2'], amps: 8000, power: '2 × 4,000A base, 2 × 5,000A tenant', when: 0,
+    pdf: 'https://healthpeakbayarea.com/wp-content/uploads/2026/10/651-Gateway-Blvd_5th-Floor-Spec-Suite_two-tenants.pdf' },
+  { id: 'gc-651-9', prop: 'Gateway Crossing', bld: '651 Gateway Blvd', floor: 9, rsf: 21905, type: 'Lab', cond: 'Spec suite', feats: ['Spec suite', 'Vivarium'], amps: 8000, power: '2 × 4,000A base, 2 × 5,000A tenant', when: 0,
+    pdf: 'https://healthpeakbayarea.com/wp-content/uploads/2026/05/651-Gateway-Blvd_9th-Floor-Spec-Suite-1.pdf' },
+  { id: 'gc-201-2', prop: 'Gateway Crossing', bld: '201 Gateway Blvd', floor: 2, rsf: 26553, type: 'Lab', cond: '', feats: [], amps: 2000, power: '2,000A', when: 1,
+    pdf: 'https://healthpeakbayarea.com/wp-content/uploads/2025/10/201-Gateway_Second-Floor.pdf' },
+  { id: 'gc-2cd-2', prop: 'Gateway Crossing', bld: '2 Corporate Dr', floor: 2, rsf: 45912, type: 'Lab', cond: '', feats: ['Vivarium'], amps: 3000, power: '3,000A', when: 2,
+    pdf: 'https://healthpeakbayarea.com/wp-content/uploads/2025/08/2-Corporate-Dr_Second-Floor.pdf' },
+  { id: 'gc-701-2', prop: 'Gateway Crossing', bld: '701 Gateway Blvd', floor: 2, rsf: 26468, type: 'Office', cond: 'Three suites', feats: [], amps: 3000, power: '3,000A', when: 0,
+    pdf: 'https://healthpeakbayarea.com/wp-content/uploads/2026/08/701-Gateway_2nd-Floor-1.pdf' },
+  { id: 'gc-611-6', prop: 'Gateway Crossing', bld: '611 Gateway Blvd', floor: 6, rsf: 24768, type: 'Office', cond: 'Full floor opportunity', feats: ['Full floor'], amps: 3000, power: '2,500A base, 3,000A tenant', when: 0,
+    pdf: 'https://healthpeakbayarea.com/wp-content/uploads/2026/08/611-Gateway_6th-Floor.pdf' }
+];
+SAMPLE.forEach(function (s) { s.status = 'Available'; });
+
+var fmt = function (n) { return '±' + n.toLocaleString('en-US'); };
+var ordinal = function (n) { var s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+var esc = function (t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; };
+function available() { return SAMPLE.filter(function (s) { return s.status === 'Available'; }); }
+function label(s) { return s.bld + ' · ' + ordinal(s.floor) + ' floor'; }
+
+// ---- Send the Portside part to the property-page embed, in the WordPress REST shape -------------
+var PORTSIDE_BUILDINGS = [1100, 1120, 1130, 1140, 1150, 1170, 1180, 329, 331, 333].map(function (n) {
+  var name = n < 1000 ? n + ' Oyster Point Blvd' : n + ' Veterans Blvd';
+  var model = n < 1000 ? n + ' Oyster Point' : n + ' Veterans';
+  return { id: n, title: { rendered: name }, acf: { model_id: model, svg_layer_id: '_' + n + 'ON', property: 'Portside' } };
+});
+function sendToEmbed() {
+  var frame = document.getElementById('hp-portside');
+  if (!frame || !frame.contentWindow) return;
+  var availability = available().filter(function (s) { return s.prop === 'Portside'; }).map(function (s, i) {
+    return { id: 9000 + i, acf: { building: s.bid, floor: s.floor, suite: ordinal(s.floor) + ' Floor', rsf: s.rsf, status: 'Available', plan_type: s.cond, floor_plan_pdf: s.pdf, floor_plan_image: '' } };
+  });
+  frame.contentWindow.postMessage({ type: 'hp-data', data: { buildings: PORTSIDE_BUILDINGS, availability: availability } }, location.origin);
+}
+window.addEventListener('message', function (e) {
+  if (e.origin !== location.origin || !e.data) return;
+  if (e.data.type === 'hp-embed-height') document.getElementById('hp-portside').style.height = e.data.height + 'px';
+  if (e.data.type === 'hp-embed-ready') sendToEmbed();
+});
+
+// ---- "Try it": one WordPress-style edit ---------------------------------------------------------
+(function () {
+  var sel = document.getElementById('wp-space'), btnA = document.getElementById('wp-avail'), btnL = document.getElementById('wp-leased');
+  var status = document.getElementById('rp-status'), steps = ['rp-table', 'rp-plan', 'rp-search'].map(function (id) { return document.getElementById(id); });
+  var pending = 'Available', timers = [];
+  // Only Portside spaces here, so every edit shows up on the site plan right below
+  var ORIGINAL = JSON.stringify(SAMPLE);
+  var rsf = document.getElementById('wp-rsf'), cond = document.getElementById('wp-cond'), when = document.getElementById('wp-when'),
+      viv = document.getElementById('wp-viv'), bsl = document.getElementById('wp-bsl');
+  function fillOptions() {
+    var keep = sel.value; sel.innerHTML = '';
+    SAMPLE.filter(function (s) { return s.prop === 'Portside'; }).forEach(function (s) {
+      var o = document.createElement('option'); o.value = s.id; o.textContent = label(s) + ' (' + fmt(s.rsf) + ' RSF)'; sel.appendChild(o);
+    });
+    sel.value = keep || 'ps-331-2';
+  }
+  fillOptions();
+  function current() { return SAMPLE.filter(function (s) { return s.id === sel.value; })[0]; }
+  function setPending(v) { pending = v; btnA.setAttribute('aria-pressed', String(v === 'Available')); btnL.setAttribute('aria-pressed', String(v === 'Leased')); }
+  function reflect() {
+    var s = current(); setPending(s.status);
+    rsf.value = s.rsf; cond.value = s.cond; when.value = String(s.when);
+    viv.checked = s.feats.indexOf('Vivarium') > -1; bsl.checked = s.feats.indexOf('BSL-2') > -1;
+  }
+  reflect();
+  sel.addEventListener('change', reflect);
+  btnA.addEventListener('click', function () { setPending('Available'); });
+  btnL.addEventListener('click', function () { setPending('Leased'); });
+  function ripple(msg) {
+    timers.forEach(clearTimeout); timers = [];
+    steps.forEach(function (li) { li.classList.remove('is-done'); li.querySelector('i').textContent = li.id === 'rp-table' ? '1' : li.id === 'rp-plan' ? '2' : '3'; });
+    steps.forEach(function (li, i) { timers.push(setTimeout(function () { li.classList.add('is-done'); li.querySelector('i').textContent = '✓'; }, 200 + i * 260)); });
+    status.textContent = msg;
+  }
+  document.getElementById('wp-update').addEventListener('click', function () {
+    var n = Math.round(+rsf.value);
+    if (!n || n < 1000) { status.textContent = 'Enter the rentable SF as a number, like 25000.'; rsf.focus(); return; }
+    var s = current();
+    s.rsf = n; s.cond = cond.value; s.when = +when.value; s.status = pending;
+    s.feats = [];
+    if (s.cond === 'Spec suite') s.feats.push('Spec suite');
+    if (/Full floor/.test(s.cond)) s.feats.push('Full floor');
+    if (viv.checked) s.feats.push('Vivarium');
+    if (bsl.checked) s.feats.push('BSL-2');
+    fillOptions(); sendToEmbed(); renderResults();
+    ripple('Saved: ' + label(s) + ', ' + fmt(n) + ' RSF, ' + s.cond.toLowerCase() + ', ' + pending.toLowerCase() + '. One change, and the site plan, list and search all updated.');
+  });
+  document.getElementById('wp-reset').addEventListener('click', function () {
+    JSON.parse(ORIGINAL).forEach(function (o, i) { Object.assign(SAMPLE[i], o); });
+    fillOptions(); reflect(); sendToEmbed(); renderResults();
+    steps.forEach(function (li, i) { li.classList.remove('is-done'); li.querySelector('i').textContent = String(i + 1); });
+    status.textContent = 'Sample data reset to the original values.';
+  });
+})();
+
+// ---- Filter list ----------------------------------------------------------------------------------
+var F = { min: document.getElementById('f-min'), max: document.getElementById('f-max'), date: document.getElementById('f-date'),
+          prop: document.getElementById('f-prop'), power: document.getElementById('f-power'), type: 'any' };
+function readFilters() {
+  return {
+    min: +F.min.value || 0, max: +F.max.value || Infinity, type: F.type, date: +F.date.value, prop: F.prop.value, power: +F.power.value,
+    feats: Array.prototype.map.call(document.querySelectorAll('#filters .checks input:checked'), function (c) { return c.value; })
+  };
+}
+function match(f) {
+  var mid = isFinite(f.max) ? (f.min + f.max) / 2 : f.min;
+  return available().filter(function (s) {
+    return s.rsf >= f.min && s.rsf <= f.max &&
+      (f.type === 'any' || s.type === f.type) &&
+      s.when <= f.date &&
+      (f.prop === 'any' || s.prop === f.prop) &&
+      (!f.power || s.amps >= f.power) &&
+      f.feats.every(function (x) { return s.feats.indexOf(x) > -1; });
+  }).sort(function (a, b) { return Math.abs(a.rsf - mid) - Math.abs(b.rsf - mid); });
+}
+function card(s) {
+  var tags = '<span class="tagx' + (s.type === 'Lab' ? ' type-lab' : '') + '">' + s.type + '</span>' +
+    (s.cond ? '<span class="tagx">' + esc(s.cond) + '</span>' : '') +
+    s.feats.filter(function (x) { return !(x === 'Spec suite' && /Spec suite/.test(s.cond)) && !(x === 'Full floor' && /Full floor/.test(s.cond)); })
+      .map(function (x) { return '<span class="tagx feat">' + esc(x) + '</span>'; }).join('') +
+    '<span class="tagx">Available ' + (s.when ? WHEN[s.when] : 'now') + '</span>';
+  return '<article class="space">' +
+    '<div><h5>' + esc(label(s)) + '</h5><div class="where">' + esc(s.prop) + ' · Power: ' + esc(s.power) + '</div></div>' +
+    '<div class="size">' + fmt(s.rsf) + '<small>RSF</small></div>' +
+    '<div class="meta">' + tags + '</div>' +
+    '<div class="links"><a href="' + s.pdf + '" target="_blank" rel="noopener">Floor plan PDF ↗</a><span class="muted">Contact the leasing team</span></div>' +
+  '</article>';
+}
+function renderResults() {
+  var list = match(readFilters()), out = document.getElementById('r-list');
+  document.getElementById('r-count').textContent = list.length + (list.length === 1 ? ' space matches' : ' spaces match');
+  out.innerHTML = list.length ? list.map(card).join('') :
+    '<div class="no-match">No spaces match all of these. Try widening the size range or removing a feature.</div>';
+}
+document.getElementById('filters').addEventListener('input', renderResults);
+document.getElementById('filters').addEventListener('submit', function (e) { e.preventDefault(); });
+document.querySelectorAll('#f-type button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    F.type = b.dataset.v;
+    document.querySelectorAll('#f-type button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+    renderResults();
+  });
+});
+function setFilters(o) {
+  F.min.value = o.min; F.max.value = o.max; F.date.value = '99'; F.prop.value = 'any'; F.power.value = '0';
+  F.type = o.type || 'any';
+  document.querySelectorAll('#f-type button').forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.v === F.type)); });
+  document.querySelectorAll('#filters .checks input').forEach(function (c) { c.checked = (o.feats || []).indexOf(c.value) > -1; });
+  renderResults();
+}
+document.getElementById('f-clear').addEventListener('click', function () { setFilters({ min: '', max: '', type: 'any', feats: [] }); });
+renderResults();
+
+var startChat = function () {};
+
+// ---- Simulated chat (answers come from the same sample data) ----------------------------------------
+(function () {
+  var log = document.getElementById('log');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var timers = [], started = false;
+  function later(fn, ms) { timers.push(setTimeout(fn, reduce ? 0 : ms)); }
+  function scroll() { log.scrollTop = log.scrollHeight; }
+  function add(html, who) { var d = document.createElement('div'); d.className = 'msg ' + who; d.innerHTML = html; log.appendChild(d); scroll(); return d; }
+  function typing(ms, then) {
+    var t = document.createElement('div'); t.className = 'typing'; t.innerHTML = '<i></i><i></i><i></i>'; log.appendChild(t); scroll();
+    later(function () { t.remove(); then(); }, ms);
+  }
+  function result(s) {
+    return '<div class="result"><b>' + esc(label(s)) + '</b><span>' + esc(s.prop) + ' · ' + fmt(s.rsf) + ' RSF' + (s.cond ? ' · ' + esc(s.cond) : '') + '</span>' +
+      '<a href="' + s.pdf + '" target="_blank" rel="noopener">Floor plan PDF ↗</a></div>';
+  }
+  function answer(ready) {
+    var feats = ready ? ['Spec suite'] : [];
+    var all = match({ min: 20000, max: 30000, type: 'Lab', date: 99, prop: 'any', power: 0, feats: feats });
+    add(ready ? 'Move-in ready' : 'Either is fine', 'user');
+    typing(900, function () {
+      if (!all.length) { add('Nothing in that range is available right now. Want me to widen the size range, or connect you with the leasing team?', 'bot'); later(handoff, 600); return; }
+      var top = all.slice(0, 3), more = all.length - top.length;
+      var html = (all.length === 1 ? 'I found 1 lab space' : 'I found ' + all.length + ' lab spaces') + ' between 20,000 and 30,000 RSF' + (ready ? ' that are move-in ready' : '') + '. The closest to 25,000:' +
+        top.map(result).join('') +
+        '<div class="chips"><span class="chip">Lab</span><span class="chip">20–30k RSF</span>' + (ready ? '<span class="chip">Move-in ready</span>' : '') + '</div>' +
+        (more > 0 ? '<button type="button" class="see-all">See all ' + all.length + ' in the filter list →</button>' : '');
+      var m = add(html, 'bot');
+      var btn = m.querySelector('.see-all');
+      if (btn) btn.addEventListener('click', function () {
+        setFilters({ min: 20000, max: 30000, type: 'Lab', feats: feats });
+        document.getElementById('panel-filter').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+      });
+      later(handoff, 700);
+    });
+  }
+  function handoff() {
+    add('Want me to connect you with the leasing team about these?', 'bot');
+    var c = document.createElement('div'); c.className = 'choices';
+    c.innerHTML = '<button type="button">Contact the leasing team</button><button type="button">Start a new search</button>';
+    c.querySelectorAll('button')[1].addEventListener('click', function () { run(); });
+    log.appendChild(c); scroll();
+  }
+  function run() {
+    timers.forEach(clearTimeout); timers = []; log.innerHTML = '';
+    add('Hi! Tell me what kind of space you’re looking for.', 'bot');
+    later(function () { add('We need about 25,000 SF of lab space, ideally ready soon', 'user'); }, 900);
+    later(function () {
+      typing(1000, function () {
+        add('Got it: lab space around 25,000 RSF.<div class="chips"><span class="chip">Lab</span><span class="chip">20–30k RSF</span></div>', 'bot');
+        later(function () {
+          add('Do you need it move-in ready, or are you open to building out a shell or planned space?', 'bot');
+          var c = document.createElement('div'); c.className = 'choices';
+          c.innerHTML = '<button type="button" data-a="ready">Move-in ready</button><button type="button" data-a="either">Either is fine</button>';
+          c.querySelectorAll('button').forEach(function (b) {
+            b.addEventListener('click', function () {
+              c.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+              b.classList.add('is-picked'); answer(b.dataset.a === 'ready');
+            });
+          });
+          log.appendChild(c); scroll();
+        }, 600);
+      });
+    }, 1700);
+  }
+  startChat = function () { if (!started) { started = true; run(); } };
+  // Start the conversation when the chat scrolls into view
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { startChat(); io.disconnect(); } }, { threshold: .4 });
+    io.observe(document.querySelector('.chat'));
+  } else startChat();
+  document.getElementById('replay').addEventListener('click', run);
+  add('Hi! Tell me what kind of space you’re looking for.', 'bot');
+})();
+
+// ---- Step nav highlight ----------------------------------------------------------------------------
+(function () {
+  var links = document.querySelectorAll('.steps-nav a');
+  if (!('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (e.isIntersecting) links.forEach(function (a) { a.classList.toggle('is-here', a.getAttribute('href') === '#' + e.target.id); });
+    });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  document.querySelectorAll('main section').forEach(function (s) { io.observe(s); });
+})();
+</script>
+</body>
+</html>
