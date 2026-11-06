@@ -1,0 +1,229 @@
+{
+  "updated": "2026-11-06T18:20:33.961Z",
+  "intro": {
+    "title": "Explore the Campus",
+    "text": "Click a building or anything in the map key to learn more."
+  },
+  "items": {
+    "roads": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": false,
+      "name": "Roads"
+    },
+    "trails": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Trails"
+    },
+    "water": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Water"
+    },
+    "greenspace": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Greenspace"
+    },
+    "parks": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Park & Seating Areas"
+    },
+    "foodtrucks": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Food Truck Locations"
+    },
+    "conference": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Conference Center"
+    },
+    "gym": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Gym"
+    },
+    "ev": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "EV Charging Stations"
+    },
+    "cafe": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Cafe"
+    },
+    "b1": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Gateway 112",
+      "address": "11201 SE 8th St",
+      "rsf": "",
+      "building": 1
+    },
+    "b2": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Primrose",
+      "address": "1150 114th Ave SE",
+      "rsf": "",
+      "building": 2
+    },
+    "b3": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Cypress",
+      "address": "1203 114th Ave SE",
+      "rsf": "",
+      "building": 3
+    },
+    "b4": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Rogers",
+      "address": "1215 114th Ave SE",
+      "rsf": "",
+      "building": 4
+    },
+    "b5": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Madrona",
+      "address": "1300 114th Ave SE",
+      "rsf": "",
+      "building": 5
+    },
+    "b6": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Bellefield",
+      "address": "1309 114th Ave SE",
+      "rsf": "",
+      "building": 6
+    },
+    "b7": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Cedar",
+      "address": "1400 112th Ave SE",
+      "rsf": "",
+      "building": 7
+    },
+    "b8": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Conifer",
+      "address": "1450 114th Ave SE",
+      "rsf": "",
+      "building": 8
+    },
+    "b9": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Metropolitan Market",
+      "address": "1500 114th Ave SE",
+      "rsf": "",
+      "building": 9
+    },
+    "b10": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Alderwood",
+      "address": "1601 114th Ave SE",
+      "rsf": "",
+      "building": 10
+    },
+    "b11": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Arbor",
+      "address": "1621 114th Ave SE",
+      "rsf": "",
+      "building": 11
+    },
+    "b12": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Maplewood",
+      "address": "1687 114th Ave SE",
+      "rsf": "",
+      "building": 12
+    },
+    "b13": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Woodridge",
+      "address": "1715 114th Ave SE",
+      "rsf": "",
+      "building": 13
+    },
+    "b14": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Edifects",
+      "address": "1756 114th Ave SE",
+      "rsf": "",
+      "building": 14
+    },
+    "b15": {
+      "text": "",
+      "image": "",
+      "show": true,
+      "clickable": true,
+      "name": "Aspen",
+      "address": "1800 114th Ave SE",
+      "rsf": "",
+      "building": 15
+    }
+  }
+}
