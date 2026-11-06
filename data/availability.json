@@ -1,9 +1,9 @@
 {
-  "updated": "2026-11-06T06:33:15.472Z",
+  "updated": "2026-11-06T06:53:24.258Z",
   "buildings": {
     "1": "Gateway 112",
     "2": "Conference Center",
-    "3": "Westower",
+    "3": "Cypress",
     "4": "Goldsmith",
     "5": "Madrona",
     "6": "Bellefield",
@@ -17,20 +17,19 @@
     "14": "Edifects",
     "15": "Aspen"
   },
+  "types": [
+    "Campus Availability",
+    "Reserve Ready Suite"
+  ],
+  "readyType": "Reserve Ready Suite",
   "suites": [
-    {
-      "building": 8,
-      "suite": "200",
-      "sf": 1892,
-      "floor": "2nd Floor",
-      "floorplan": "https://cbre.box.com/shared/static/jxuddackmxwn54cqv5zk3zaenk2tp09y.png",
-      "pdf": ""
-    },
     {
       "building": 8,
       "suite": "220",
       "sf": 1709,
       "floor": "2nd Floor",
+      "type": "Reserve Ready Suite",
+      "ready": true,
       "floorplan": "https://cbre.box.com/shared/static/24q6ixrcqr4xn4ekwko96uxx72ydexhs.png",
       "pdf": ""
     },
@@ -39,6 +38,8 @@
       "suite": "210",
       "sf": 5742,
       "floor": "2nd Floor",
+      "type": "Reserve Ready Suite",
+      "ready": true,
       "floorplan": "https://cbre.box.com/shared/static/b3502btozrcfyeo7h8jcusldyvkdrzzu.png",
       "pdf": ""
     },
@@ -47,6 +48,8 @@
       "suite": "241",
       "sf": 2489,
       "floor": "2nd Floor",
+      "type": "Reserve Ready Suite",
+      "ready": true,
       "floorplan": "https://cbre.box.com/shared/static/rxfqasm6nmnhtlai6b6jtwxvgj95mcat.png",
       "pdf": ""
     },
@@ -55,6 +58,8 @@
       "suite": "250 + 251",
       "sf": 4095,
       "floor": "2nd Floor",
+      "type": "Reserve Ready Suite",
+      "ready": true,
       "floorplan": "https://cbre.box.com/shared/static/3284jopev8v1hz7e1xxlblnjta32999r.png",
       "pdf": ""
     },
@@ -63,6 +68,8 @@
       "suite": "212",
       "sf": 1810,
       "floor": "2nd Floor",
+      "type": "Reserve Ready Suite",
+      "ready": true,
       "floorplan": "https://cbre.box.com/shared/static/ncg17vtt2bohflhjb8gftgeib2gkkxmv.png",
       "pdf": ""
     },
@@ -71,7 +78,279 @@
       "suite": "218 + 219",
       "sf": 3942,
       "floor": "2nd Floor",
+      "type": "Reserve Ready Suite",
+      "ready": true,
       "floorplan": "https://cbre.box.com/shared/static/sarphsuogvo04evz38fiol5hqhjjh63x.png",
+      "pdf": ""
+    },
+    {
+      "building": 10,
+      "suite": "100",
+      "sf": 31057,
+      "floor": "1st Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 11,
+      "suite": "210",
+      "sf": 3480,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 11,
+      "suite": "221",
+      "sf": 2342,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 11,
+      "suite": "223",
+      "sf": 929,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 11,
+      "suite": "229",
+      "sf": 1654,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 7,
+      "suite": "206",
+      "sf": 1170,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 7,
+      "suite": "225",
+      "sf": 735,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 8,
+      "suite": "200",
+      "sf": 1892,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "https://cbre.box.com/shared/static/jxuddackmxwn54cqv5zk3zaenk2tp09y.png",
+      "pdf": ""
+    },
+    {
+      "building": 8,
+      "suite": "240",
+      "sf": 5192,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 8,
+      "suite": "250",
+      "sf": 1646,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 8,
+      "suite": "205 + 220",
+      "sf": 3355,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 8,
+      "suite": "200 + 240",
+      "sf": 7084,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 3,
+      "suite": "100",
+      "sf": 12239,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 1,
+      "suite": "100",
+      "sf": 5717,
+      "floor": "1st Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 1,
+      "suite": "110",
+      "sf": 1710,
+      "floor": "1st Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 5,
+      "suite": "101",
+      "sf": 2635,
+      "floor": "1st Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 5,
+      "suite": "102",
+      "sf": 2426,
+      "floor": "1st Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 5,
+      "suite": "106",
+      "sf": 931,
+      "floor": "1st Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 5,
+      "suite": "200",
+      "sf": 1769,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 5,
+      "suite": "208",
+      "sf": 1716,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 5,
+      "suite": "208 + 210",
+      "sf": 3916,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 5,
+      "suite": "210",
+      "sf": 2200,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 5,
+      "suite": "215",
+      "sf": 2489,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 5,
+      "suite": "220",
+      "sf": 1426,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 12,
+      "suite": "101",
+      "sf": 7597,
+      "floor": "1st Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 12,
+      "suite": "200",
+      "sf": 8810,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
+      "pdf": ""
+    },
+    {
+      "building": 13,
+      "suite": "210",
+      "sf": 1738,
+      "floor": "2nd Floor",
+      "type": "Campus Availability",
+      "ready": false,
+      "floorplan": "",
       "pdf": ""
     }
   ]
