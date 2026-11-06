@@ -175,6 +175,11 @@
   table.cm .c-t2 { color: var(--muted); font-size: 13px; display: block; max-width: 460px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   table.cm .c-b b { display: block; }
   table.cm .thumb.ph { cursor: default; }
+  /* quick add-plans window */
+  .qp-slot { display: flex; gap: 14px; align-items: center; padding: 14px; border: 1px dashed var(--gold); background: #fff; margin-bottom: 12px; }
+  .qp-slot .pv { width: 110px; height: 76px; flex: none; border: 1px solid var(--line); background: var(--cream); display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 11px; color: var(--muted); }
+  .qp-slot .pv img { max-width: 100%; max-height: 100%; }
+  .qp-slot .btn { margin-top: 8px; padding: 8px 12px; font-size: 11.5px; }
   /* tenant portal tab */
   .tp-sub { display: flex; flex-wrap: wrap; gap: 0; margin: 0 0 18px; }
   .tp-sub button { font: inherit; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .075em; padding: 9px 14px;
@@ -440,6 +445,32 @@
         <button type="submit" class="btn" id="b-save">Save</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- quick "add plans" window (from the + Floorplan button in the list) -->
+<div class="scrim" id="dlg-plans" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="qp-title">
+    <h3 id="qp-title">Add plans</h3>
+    <p class="hint" id="qp-sub" style="margin:-10px 0 16px"></p>
+    <div class="qp-slot" id="qp-plan">
+      <div class="pv">None</div>
+      <div><b>Floorplan</b> <span class="hint">(required)</span>
+        <div class="hint">The suite plan, PNG or JPG.</div>
+        <button type="button" class="btn ghost qp-pick">Choose image</button> <span class="hint qp-note"></span></div>
+    </div>
+    <div class="qp-slot" id="qp-key">
+      <div class="pv">None</div>
+      <div><b>Key plan</b> <span class="hint">(optional)</span>
+        <div class="hint">The smaller whole-floor plan with the suite highlighted.</div>
+        <button type="button" class="btn ghost qp-pick">Choose image</button> <span class="hint qp-note"></span></div>
+    </div>
+    <p class="hint">A north arrow can be added later with <b>Edit</b>.</p>
+    <p class="err" id="e-plans" hidden></p>
+    <div class="actions">
+      <button type="button" class="btn ghost" data-close>Cancel</button>
+      <button type="button" class="btn" id="b-plans" disabled>Save + make PDF</button>
+    </div>
   </div>
 </div>
 
@@ -947,7 +978,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
       } else {
         // no floorplan yet: one-click upload right from the list
         var add = el("button", "pdfl make", "+ Floorplan"); add.type = "button"; add.title = "Add a floorplan image (PNG or JPG)";
-        add.addEventListener("click", function () { quickPlan(s, add); });
+        add.addEventListener("click", function () { quickPlan(s); });
         tf.appendChild(add);
       }
       tr.appendChild(tf);
@@ -1002,31 +1033,46 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   function syncRR() { $("rrbox").classList.toggle("on", $("s-ready").checked); }
   $("s-ready").addEventListener("change", syncRR);
 
-  // one-click floorplan upload from the list: upload, save, then make the PDF
-  function quickPlan(s, btn) {
-    var fi = document.createElement("input"); fi.type = "file"; fi.accept = "image/png,image/jpeg";
-    fi.addEventListener("change", function () {
-      var f = fi.files[0]; if (!f) return;
-      if (!/^image\/(png|jpeg)$/.test(f.type)) { toast("Please choose a PNG or JPG image.", true); return; }
-      btn.disabled = true; btn.textContent = "Uploading\u2026";
-      var url;
-      shrink(f).then(function (out) {
-        return api("upload", { file: { name: f.name, mime: out.mime, data: out.dataUrl } }).then(function (j) { url = j.url; planData[url] = out.dataUrl; });
-      }).then(function () {
-        btn.textContent = "Saving\u2026";
-        return api("saveSuite", { suite: { id: s.id, building: s.building, suite: s.suite, sf: s.sf, floor: s.floor, type: s.type,
-          floorplan: url, pdf: s.pdf, notes: s.notes, show: s.show } });
-      }).then(function (j) {
-        if (j.status) state.status = j.status;
-        btn.textContent = "Making PDF\u2026";
-        var x = Object.assign({}, s, { floorplan: url });
-        return makePdf(x).then(function () { toast("Floorplan added and PDF made. Publish to update the website."); },
-                               function (err) { toast("Floorplan added, but the PDF couldn't be made: " + err.message, true); });
-      }).catch(function (err) { toast(err.message || "Upload failed.", true); })
-        .then(function () { return refresh(); });
-    });
-    fi.click();
+  // "+ Floorplan" in the list: a small window to add the floorplan and (optionally) the key plan, then save + make the PDF
+  var qp = { suite: null, plan: "", key: "", busy: 0 };
+  function quickPlan(s) {
+    qp = { suite: s, plan: "", key: "", busy: 0 };
+    $("qp-sub").textContent = bName(s.building) + ", Suite " + s.suite;
+    ["qp-plan", "qp-key"].forEach(function (id) { var box = $(id); box.querySelector(".pv").textContent = "None"; box.querySelector(".qp-note").textContent = ""; });
+    $("e-plans").hidden = true; qpSync(); open("dlg-plans");
   }
+  function qpSync() { $("b-plans").disabled = !qp.plan || qp.busy > 0; }
+  [["qp-plan", "plan"], ["qp-key", "key"]].forEach(function (p) {
+    var box = $(p[0]), fi = document.createElement("input"); fi.type = "file"; fi.accept = "image/png,image/jpeg"; fi.hidden = true; box.appendChild(fi);
+    box.querySelector(".qp-pick").addEventListener("click", function () { fi.click(); });
+    fi.addEventListener("change", function () {
+      var f = fi.files[0]; fi.value = ""; if (!f) return;
+      if (!/^image\/(png|jpeg)$/.test(f.type)) { toast("Please choose a PNG or JPG image.", true); return; }
+      var pv = box.querySelector(".pv"), note = box.querySelector(".qp-note");
+      qp.busy++; qpSync(); note.textContent = "Uploading…";
+      shrink(f).then(function (out) {
+        pv.innerHTML = ""; var im = new Image(); im.src = out.dataUrl; pv.appendChild(im);
+        return api("upload", { file: { name: (p[1] === "key" ? "keyplan-" : "") + f.name, mime: out.mime, data: out.dataUrl } }).then(function (j) {
+          qp[p[1]] = j.url; planData[j.url] = out.dataUrl; note.textContent = "Uploaded ✓";
+        });
+      }).catch(function (err) { note.textContent = ""; toast(err.message || "Upload failed.", true); })
+        .then(function () { qp.busy--; qpSync(); });
+    });
+  });
+  $("b-plans").addEventListener("click", function () {
+    var s = qp.suite, b = $("b-plans"); busy(b, true, "Saving…"); $("e-plans").hidden = true;
+    var save = { id: s.id, building: s.building, suite: s.suite, sf: s.sf, floor: s.floor, type: s.type, floorplan: qp.plan, pdf: s.pdf, notes: s.notes, show: s.show };
+    if (qp.key) save.keyplan = qp.key;
+    api("saveSuite", { suite: save }).then(function (j) {
+      if (j.status) state.status = j.status;
+      b.innerHTML = '<span class="spin"></span> Making PDF…';
+      var x = Object.assign({}, s, { floorplan: qp.plan, keyplan: qp.key || s.keyplan });
+      return makePdf(x).then(function () { toast("Plans added and PDF made. Publish to update the website."); },
+                             function (err) { toast("Plans added, but the PDF couldn't be made: " + err.message, true); })
+        .then(function () { close("dlg-plans"); return refresh(); });
+    }).catch(function (err) { $("e-plans").textContent = err.message; $("e-plans").hidden = false; })
+      .then(function () { busy(b, false); qpSync(); });
+  });
 
   // one-click Reserve Ready on/off from the list
   function quickReady(s, cb, sw) {
