@@ -1,0 +1,78 @@
+{
+  "updated": "2026-11-06T06:33:15.472Z",
+  "buildings": {
+    "1": "Gateway 112",
+    "2": "Conference Center",
+    "3": "Westower",
+    "4": "Goldsmith",
+    "5": "Madrona",
+    "6": "Bellefield",
+    "7": "Cedar",
+    "8": "Conifer",
+    "9": "GLU",
+    "10": "Alderwood",
+    "11": "Arbor",
+    "12": "Maplewood",
+    "13": "Woodridge",
+    "14": "Edifects",
+    "15": "Aspen"
+  },
+  "suites": [
+    {
+      "building": 8,
+      "suite": "200",
+      "sf": 1892,
+      "floor": "2nd Floor",
+      "floorplan": "https://cbre.box.com/shared/static/jxuddackmxwn54cqv5zk3zaenk2tp09y.png",
+      "pdf": ""
+    },
+    {
+      "building": 8,
+      "suite": "220",
+      "sf": 1709,
+      "floor": "2nd Floor",
+      "floorplan": "https://cbre.box.com/shared/static/24q6ixrcqr4xn4ekwko96uxx72ydexhs.png",
+      "pdf": ""
+    },
+    {
+      "building": 1,
+      "suite": "210",
+      "sf": 5742,
+      "floor": "2nd Floor",
+      "floorplan": "https://cbre.box.com/shared/static/b3502btozrcfyeo7h8jcusldyvkdrzzu.png",
+      "pdf": ""
+    },
+    {
+      "building": 5,
+      "suite": "241",
+      "sf": 2489,
+      "floor": "2nd Floor",
+      "floorplan": "https://cbre.box.com/shared/static/rxfqasm6nmnhtlai6b6jtwxvgj95mcat.png",
+      "pdf": ""
+    },
+    {
+      "building": 5,
+      "suite": "250 + 251",
+      "sf": 4095,
+      "floor": "2nd Floor",
+      "floorplan": "https://cbre.box.com/shared/static/3284jopev8v1hz7e1xxlblnjta32999r.png",
+      "pdf": ""
+    },
+    {
+      "building": 13,
+      "suite": "212",
+      "sf": 1810,
+      "floor": "2nd Floor",
+      "floorplan": "https://cbre.box.com/shared/static/ncg17vtt2bohflhjb8gftgeib2gkkxmv.png",
+      "pdf": ""
+    },
+    {
+      "building": 13,
+      "suite": "218 + 219",
+      "sf": 3942,
+      "floor": "2nd Floor",
+      "floorplan": "https://cbre.box.com/shared/static/sarphsuogvo04evz38fiol5hqhjjh63x.png",
+      "pdf": ""
+    }
+  ]
+}
