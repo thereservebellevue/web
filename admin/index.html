@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>The Reserve · Website Editor</title>
+<link rel="stylesheet" href="https://use.typekit.net/xqr0eik.css">
+<style>
+  :root {
+    --gold: #a39068; --gold-dark: #7d6c4a; --ink: #333536; --cream: #f0ece6;
+    --paper: #faf8f4; --line: #d9cfbd; --muted: #6f6a62; --ok: #4f6b4c; --warn: #a4492f;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--cream); color: var(--ink); font: 15px/1.5 "avenir-next-lt-pro", "Avenir Next", Avenir, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  .caps { text-transform: uppercase; letter-spacing: .075em; font-weight: 700; }
+  [hidden] { display: none !important; }
+
+  /* ---------- buttons & fields ---------- */
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border: 1px solid var(--ink); background: var(--ink); color: var(--cream);
+         cursor: pointer; text-transform: uppercase; letter-spacing: .075em; font-weight: 700; font-size: 12.5px; }
+  .btn:hover:not(:disabled) { background: var(--gold-dark); border-color: var(--gold-dark); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn.ghost { background: transparent; color: var(--ink); }
+  .btn.ghost:hover:not(:disabled) { color: var(--cream); }
+  .btn.gold { background: var(--gold); border-color: var(--gold); }
+  .btn.danger { background: var(--warn); border-color: var(--warn); }
+  .link { background: none; border: 0; padding: 0; cursor: pointer; color: var(--gold-dark); text-decoration: underline; text-underline-offset: 3px; }
+  label.f { display: block; margin-bottom: 16px; }
+  label.f > span { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .075em; font-weight: 700; color: var(--gold-dark); margin-bottom: 6px; }
+  input[type=text], input[type=email], input[type=number], select, textarea {
+    width: 100%; padding: 11px 12px; border: 1px solid var(--line); background: #fff; border-radius: 0; }
+  input:focus, select:focus, textarea:focus, .btn:focus-visible, .link:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  textarea { min-height: 70px; resize: vertical; }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .err { color: var(--warn); font-size: 14px; margin: 8px 0 0; }
+
+  /* ---------- sign-in ---------- */
+  .login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+  .card { background: var(--paper); border-top: 4px solid var(--gold); padding: 36px 32px; width: 100%; max-width: 420px; box-shadow: 0 1px 0 var(--line); }
+  .eyebrow { color: var(--gold); font-size: 12px; margin: 0 0 4px; }
+  .card h1 { margin: 0 0 6px; font-size: 24px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+  .card p.lead { margin: 0 0 22px; color: var(--muted); }
+  .code-input { font-size: 26px !important; letter-spacing: .4em; text-align: center; font-variant-numeric: tabular-nums; }
+  .row-between { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; font-size: 14px; }
+
+  /* ---------- app shell ---------- */
+  header.top { background: var(--ink); color: var(--cream); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+  header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 64px; }
+  .brand { display: flex; flex-direction: column; line-height: 1.2; }
+  .brand small { color: var(--gold); font-size: 11px; }
+  .brand b { font-size: 16px; text-transform: uppercase; letter-spacing: .075em; }
+  .who { display: flex; align-items: center; gap: 14px; font-size: 13px; color: #cfc8bc; }
+  .who .link { color: var(--cream); }
+  nav.tabs { background: var(--paper); border-bottom: 1px solid var(--line); }
+  nav.tabs .wrap { display: flex; gap: 4px; overflow-x: auto; }
+  nav.tabs button { background: none; border: 0; border-bottom: 3px solid transparent; padding: 14px 14px 11px; cursor: pointer;
+                    text-transform: uppercase; letter-spacing: .075em; font-weight: 700; font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+  nav.tabs button[aria-selected=true] { color: var(--ink); border-bottom-color: var(--gold); }
+  nav.tabs button:disabled { opacity: .45; cursor: default; }
+
+  .pubbar { position: sticky; top: 0; z-index: 5; background: var(--cream); border-bottom: 1px solid var(--line); }
+  .pubbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 12px; padding-bottom: 12px; flex-wrap: wrap; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; background: var(--ok); vertical-align: 1px; }
+  .dot.pending { background: #c98a2e; }
+  .pubstate { font-size: 14px; }
+  .pubstate small { display: block; color: var(--muted); font-size: 12.5px; }
+
+  main .wrap { padding-top: 24px; padding-bottom: 60px; }
+  .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .toolbar h2 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: .075em; }
+  .toolbar .count { color: var(--muted); font-size: 14px; margin-left: 8px; font-weight: 400; text-transform: none; letter-spacing: 0; }
+  .filters { display: flex; gap: 10px; align-items: center; }
+  .filters select { width: auto; padding: 9px 10px; }
+
+  table.grid { width: 100%; border-collapse: collapse; background: var(--paper); }
+  .grid th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: .075em; color: var(--gold-dark); padding: 12px 12px; border-bottom: 1px solid var(--gold); white-space: nowrap; }
+  .grid td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .grid tr.off td:not(.act) { color: var(--muted); }
+  .thumb { width: 64px; height: 44px; border: 1px solid var(--line); background: #fff; display: flex; align-items: center; justify-content: center;
+           overflow: hidden; cursor: pointer; padding: 0; font-size: 10.5px; color: var(--muted); }
+  .thumb img { max-width: 100%; max-height: 100%; }
+  .pill { display: inline-block; font-size: 11px; text-transform: uppercase; letter-spacing: .075em; font-weight: 700; padding: 3px 8px; border: 1px solid; }
+  .pill.on { color: var(--ok); border-color: var(--ok); }
+  .pill.offp { color: var(--muted); border-color: var(--line); }
+  .act { white-space: nowrap; text-align: right; }
+  .act .link + .link { margin-left: 14px; }
+  .act .link.del { color: var(--warn); }
+  .empty { text-align: center; padding: 40px 12px; color: var(--muted); background: var(--paper); }
+
+  .history { list-style: none; margin: 0; padding: 0; background: var(--paper); }
+  .history li { padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .history .when { color: var(--muted); font-size: 12.5px; }
+  .history .det { color: var(--muted); font-size: 13px; word-break: break-word; }
+
+  /* ---------- dialogs ---------- */
+  .scrim { position: fixed; inset: 0; background: rgba(51,53,54,.55); z-index: 20; display: flex; align-items: flex-start; justify-content: center; padding: 5vh 16px; overflow-y: auto; }
+  .dialog { background: var(--paper); width: 100%; max-width: 560px; border-top: 4px solid var(--gold); padding: 26px 26px 22px; }
+  .dialog h3 { margin: 0 0 18px; font-size: 18px; text-transform: uppercase; letter-spacing: .075em; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+  .drop { border: 1.5px dashed var(--gold); background: #fff; padding: 16px; display: flex; gap: 14px; align-items: center; cursor: pointer; }
+  .drop.over { background: #f3ede2; }
+  .drop .pv { width: 96px; height: 70px; flex: none; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; overflow: hidden; background: var(--cream); font-size: 11px; color: var(--muted); text-align: center; }
+  .drop .pv img { max-width: 100%; max-height: 100%; }
+  .drop .txt { font-size: 14px; }
+  .switch { display: flex; align-items: center; gap: 10px; cursor: pointer; margin: 4px 0 18px; }
+  .switch input { width: 18px; height: 18px; accent-color: var(--gold-dark); }
+  .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+  .viewer img { max-width: 100%; display: block; margin: 0 auto; }
+
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--cream); padding: 12px 18px; z-index: 30; font-size: 14px; max-width: calc(100% - 32px); }
+  .toast.bad { background: var(--warn); }
+  .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: s .8s linear infinite; }
+  @keyframes s { to { transform: rotate(360deg); } }
+
+  @media (max-width: 720px) {
+    .who span.email { display: none; }
+    .two { grid-template-columns: 1fr; }
+    table.grid, .grid tbody { display: block; }
+    .grid thead { display: none; }
+    .grid tr { display: block; position: relative; padding: 12px 92px 12px 14px; border-bottom: 1px solid var(--line); min-height: 76px; }
+    .grid td { display: inline; padding: 0; border: 0; }
+    .grid td.c-b { display: block; font-weight: 700; }
+    .grid td.c-sf::before, .grid td.c-fl:not(:empty)::before { content: " · "; color: var(--muted); }
+    .grid td.c-f { position: absolute; top: 12px; right: 14px; }
+    .grid td.c-on { display: block; margin-top: 6px; }
+    .grid td.act { display: block; text-align: left; padding-top: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ======================= SIGN-IN ======================= -->
+<section class="login" id="login" hidden>
+  <div class="card">
+    <p class="eyebrow caps">The Reserve</p>
+    <h1>Website Editor</h1>
+    <div id="step-email">
+      <p class="lead">Sign in with your approved email. We'll send you a 6-digit code.</p>
+      <form id="f-email">
+        <label class="f"><span>Email</span><input type="email" id="email" autocomplete="email" required></label>
+        <button class="btn" type="submit" id="b-send">Email me a code</button>
+        <p class="err" id="e-email" hidden></p>
+      </form>
+    </div>
+    <div id="step-code" hidden>
+      <p class="lead">Enter the code sent to <b id="sent-to"></b>. It expires in 10 minutes.</p>
+      <form id="f-code">
+        <label class="f"><span>Code</span><input type="text" id="code" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required></label>
+        <button class="btn" type="submit" id="b-verify">Sign in</button>
+        <p class="err" id="e-code" hidden></p>
+      </form>
+      <div class="row-between">
+        <button class="link" id="b-other">Use a different email</button>
+        <button class="link" id="b-resend">Send a new code</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= APP ======================= -->
+<div id="app" hidden>
+  <header class="top">
+    <div class="wrap">
+      <div class="brand"><small class="caps">The Reserve</small><b>Website Editor</b></div>
+      <div class="who"><span class="email" id="me"></span><button class="link" id="b-signout">Sign out</button></div>
+    </div>
+  </header>
+  <nav class="tabs" aria-label="Sections">
+    <div class="wrap" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="availability">Availability</button>
+      <button role="tab" aria-selected="false" data-tab="history">History</button>
+      <button role="tab" disabled title="Coming soon">Campus Map</button>
+      <button role="tab" disabled title="Coming soon">Amenities</button>
+    </div>
+  </nav>
+  <div class="pubbar">
+    <div class="wrap">
+      <div class="pubstate" id="pubstate"></div>
+      <button class="btn gold" id="b-publish">Publish to website</button>
+    </div>
+  </div>
+
+  <main>
+    <div class="wrap">
+      <section id="tab-availability">
+        <div class="toolbar">
+          <h2>Availability <span class="count" id="count"></span></h2>
+          <div class="filters">
+            <select id="filter-b" aria-label="Filter by building"><option value="">All buildings</option></select>
+            <button class="btn" id="b-add">+ Add suite</button>
+          </div>
+        </div>
+        <table class="grid">
+          <thead><tr><th>Building</th><th>Suite</th><th>Size</th><th>Floor</th><th>Floorplan</th><th>On website</th><th></th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div class="empty" id="empty" hidden>No suites yet. Click “+ Add suite” to add one.</div>
+      </section>
+
+      <section id="tab-history" hidden>
+        <div class="toolbar"><h2>History</h2><button class="btn ghost" id="b-refresh-h">Refresh</button></div>
+        <ul class="history" id="history"></ul>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- edit dialog -->
+<div class="scrim" id="dlg-edit" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+    <h3 id="edit-title">Edit suite</h3>
+    <form id="f-suite">
+      <div class="two">
+        <label class="f"><span>Building</span><select id="s-building" required></select></label>
+        <label class="f"><span>Suite</span><input type="text" id="s-suite" placeholder="e.g. 210 or 250 + 251" required></label>
+        <label class="f"><span>Size (SF)</span><input type="text" id="s-sf" inputmode="numeric" placeholder="e.g. 2450" required></label>
+        <label class="f"><span>Floor</span><input type="text" id="s-floor" placeholder="e.g. 2nd Floor"></label>
+      </div>
+      <div class="f">
+        <label for="s-file" style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.075em;font-weight:700;color:var(--gold-dark);margin-bottom:6px">Floorplan</label>
+        <div class="drop" id="drop" tabindex="0">
+          <div class="pv" id="pv">None</div>
+          <div class="txt"><b>Drop a PNG or JPG here</b>, or click to choose.<div class="hint">Large images are shrunk automatically so they load fast.</div>
+            <div id="upl" class="hint" hidden></div>
+            <button type="button" class="link" id="b-rmplan" hidden>Remove floorplan</button></div>
+        </div>
+        <input type="file" id="s-file" accept="image/png,image/jpeg" hidden>
+      </div>
+      <label class="f" style="margin-top:16px"><span>Internal notes <small style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted)">(never shown on the website)</small></span>
+        <textarea id="s-notes"></textarea></label>
+      <label class="switch"><input type="checkbox" id="s-show" checked> Show on website</label>
+      <p class="err" id="e-suite" hidden></p>
+      <div class="actions">
+        <button type="button" class="btn ghost" data-close>Cancel</button>
+        <button type="submit" class="btn" id="b-save">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- delete dialog -->
+<div class="scrim" id="dlg-del" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="del-title">
+    <h3 id="del-title">Delete suite?</h3>
+    <p id="del-text"></p>
+    <p class="hint">It disappears from the website at the next Publish. A copy is kept in the Sheet's Deleted tab.</p>
+    <div class="actions">
+      <button type="button" class="btn ghost" data-close>Cancel</button>
+      <button type="button" class="btn danger" id="b-del">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- floorplan viewer -->
+<div class="scrim" id="dlg-view" hidden>
+  <div class="dialog viewer" role="dialog" aria-modal="true" style="max-width:900px">
+    <div class="actions" style="margin:0 0 12px"><button type="button" class="btn ghost" data-close>Close</button></div>
+    <img id="view-img" alt="Floorplan">
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* =========================================================================
+   SETTINGS — paste the Apps Script web app URL here (ends in /exec)
+   ========================================================================= */
+var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhnYGu9wYrCC6tJkuQbdbjbjJoGe7oWKoR0w0E98ZxOWR2A/exec";
+
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var state = { token: null, me: null, suites: [], buildings: [], status: {}, editing: null, publicBase: "" };
+  function PUBLIC_BASE() { return state.publicBase || "https://thereservebellevue.github.io/web/"; }
+  var SKEY = "reserve-editor-session";
+
+  /* ---------- helpers ---------- */
+  function store(v) { try { v ? localStorage.setItem(SKEY, JSON.stringify(v)) : localStorage.removeItem(SKEY); } catch (e) {} }
+  function stored() { try { var v = JSON.parse(localStorage.getItem(SKEY)); return v && v.exp > Date.now() ? v : null; } catch (e) { return null; } }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function bName(n) { var b = state.buildings.find(function (x) { return x.number === Number(n); }); return pad(n) + " " + (b ? b.name : ""); }
+  function fmtSF(n) { return n ? Number(n).toLocaleString("en-US") + " SF" : ""; }
+  function ago(iso) {
+    if (!iso) return ""; var s = (Date.now() - new Date(iso)) / 1000;
+    if (s < 60) return "just now"; if (s < 3600) return Math.round(s / 60) + " min ago";
+    if (s < 86400) return Math.round(s / 3600) + " hr ago";
+    return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }
+  function who(e) { return e === state.me.email ? "you" : e; }
+  var toastT;
+  function toast(msg, bad) { var t = $("toast"); t.textContent = msg; t.className = "toast" + (bad ? " bad" : ""); t.hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { t.hidden = true; }, bad ? 6000 : 3500); }
+  function busy(btn, on, label) { if (on) { btn.dataset.l = btn.textContent; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> ' + (label || "Working…"); } else { btn.disabled = false; btn.textContent = btn.dataset.l || btn.textContent; } }
+
+  function api(action, data) {
+    if (/PASTE_YOUR/.test(API_URL)) return Promise.reject(new Error("The editor isn't connected yet: paste the web app URL into API_URL."));
+    var body = Object.assign({ action: action, token: state.token }, data || {});
+    return fetch(API_URL, { method: "POST", body: JSON.stringify(body) })      // plain text body = no CORS preflight
+      .then(function (r) { return r.json(); })
+      .catch(function () { throw new Error("Couldn't reach the server. Check your connection and try again."); })
+      .then(function (j) {
+        if (!j.ok) { if (j.auth) { signOut(true); } throw new Error(j.error || "Something went wrong."); }
+        return j;
+      });
+  }
+
+  /* ---------- sign-in ---------- */
+  var pendingEmail = "";
+  function showLogin() { $("app").hidden = true; $("login").hidden = false; $("step-email").hidden = false; $("step-code").hidden = true; setTimeout(function () { $("email").focus(); }, 50); }
+  function sendCode(e) {
+    if (e) e.preventDefault();
+    var email = $("email").value.trim(), b = $("b-send"); $("e-email").hidden = true;
+    busy(b, true, "Sending…");
+    api("requestCode", { email: email }).then(function () {
+      pendingEmail = email; $("sent-to").textContent = email;
+      $("step-email").hidden = true; $("step-code").hidden = false; $("code").value = ""; $("code").focus();
+    }).catch(function (err) { $("e-email").textContent = err.message; $("e-email").hidden = false; })
+      .then(function () { busy(b, false); });
+  }
+  $("f-email").addEventListener("submit", sendCode);
+  $("b-resend").addEventListener("click", function () { $("email").value = pendingEmail; sendCode(); toast("New code sent."); });
+  $("b-other").addEventListener("click", function () { $("step-email").hidden = false; $("step-code").hidden = true; $("email").focus(); });
+  $("code").addEventListener("input", function () { this.value = this.value.replace(/\D/g, "").slice(0, 6); if (this.value.length === 6) $("f-code").requestSubmit(); });
+  $("f-code").addEventListener("submit", function (e) {
+    e.preventDefault(); var b = $("b-verify"); $("e-code").hidden = true; busy(b, true, "Checking…");
+    api("verifyCode", { email: pendingEmail, code: $("code").value }).then(function (j) {
+      state.token = j.token; state.me = j.user;
+      store({ token: j.token, me: j.user, exp: Date.now() + j.hours * 3600000 - 60000 });
+      startApp();
+    }).catch(function (err) { $("e-code").textContent = err.message; $("e-code").hidden = false; $("code").select(); })
+      .then(function () { busy(b, false); });
+  });
+  function signOut(expired) {
+    if (!expired && state.token) api("signOut").catch(function () {});
+    state.token = null; store(null); showLogin();
+    if (expired === true) toast("Your session ended. Please sign in again.", true);
+  }
+  $("b-signout").addEventListener("click", function () { signOut(false); });
+
+  /* ---------- app ---------- */
+  function startApp() {
+    $("login").hidden = true; $("app").hidden = false; $("me").textContent = state.me.email;
+    refresh();
+  }
+  function refresh() {
+    return api("load").then(function (j) {
+      state.suites = j.suites; state.buildings = j.buildings; state.status = j.status; state.publicBase = j.publicBase;
+      fillBuildingSelects(); renderRows(); renderStatus();
+    }).catch(function (err) { toast(err.message, true); });
+  }
+  function fillBuildingSelects() {
+    var f = $("filter-b"), keep = f.value; f.length = 1;
+    state.buildings.forEach(function (b) { f.appendChild(new Option(pad(b.number) + " " + b.name, b.number)); });
+    f.value = keep;
+    var s = $("s-building"); s.length = 0; s.appendChild(new Option("Choose a building…", ""));
+    state.buildings.forEach(function (b) { s.appendChild(new Option(pad(b.number) + " " + b.name, b.number)); });
+  }
+  $("filter-b").addEventListener("change", renderRows);
+
+  function renderStatus() {
+    var st = state.status, p = $("pubstate"); p.innerHTML = "";
+    if (st.unpublished) {
+      p.appendChild(el("span", "dot pending")); p.appendChild(document.createTextNode("You have changes that aren't on the website yet"));
+      p.appendChild(el("small", null, "Last edit " + ago(st.lastEditAt) + " by " + who(st.lastEditBy)));
+    } else {
+      p.appendChild(el("span", "dot")); p.appendChild(document.createTextNode("The website is up to date"));
+      if (st.lastPublishAt) p.appendChild(el("small", null, "Published " + ago(st.lastPublishAt) + " by " + who(st.lastPublishBy)));
+    }
+    $("b-publish").disabled = !st.unpublished;
+  }
+
+  function renderRows() {
+    var fb = $("filter-b").value, tb = $("rows"); tb.innerHTML = "";
+    var list = state.suites.filter(function (s) { return !fb || String(s.building) === fb; })
+      .sort(function (a, b) { return (a.building - b.building) || String(a.suite).localeCompare(String(b.suite), "en", { numeric: true }); });
+    $("count").textContent = "(" + list.length + ")";
+    $("empty").hidden = list.length > 0;
+    list.forEach(function (s) {
+      var tr = el("tr", s.show ? "" : "off");
+      tr.appendChild(el("td", "c-b", bName(s.building)));
+      tr.appendChild(el("td", "c-s", "Suite " + s.suite));
+      tr.appendChild(el("td", "c-sf", fmtSF(s.sf)));
+      tr.appendChild(el("td", "c-fl", s.floor));
+      var tf = el("td", "c-f");
+      if (s.floorplan) {
+        var th = el("button", "thumb"); th.type = "button"; th.title = "View floorplan";
+        var im = new Image(); im.alt = ""; im.loading = "lazy"; im.src = s.floorplan;
+        im.onerror = function () {
+          var fresh = s.floorplan.indexOf(PUBLIC_BASE()) === 0;
+          th.textContent = fresh ? "Processing…" : "Can't load";
+          th.title = fresh ? "New uploads appear on the site within about a minute" : "This link isn't loading. Upload the floorplan again.";
+        };
+        th.appendChild(im); th.addEventListener("click", function () { $("view-img").src = s.floorplan; open("dlg-view"); });
+        tf.appendChild(th);
+      } else tf.appendChild(el("span", "hint", "None"));
+      tr.appendChild(tf);
+      var to = el("td", "c-on"); to.appendChild(el("span", "pill " + (s.show ? "on" : "offp"), s.show ? "Shown" : "Hidden")); tr.appendChild(to);
+      var ta = el("td", "act");
+      var be = el("button", "link", "Edit"); be.type = "button"; be.addEventListener("click", function () { editSuite(s); });
+      var bd = el("button", "link del", "Delete"); bd.type = "button"; bd.addEventListener("click", function () { askDelete(s); });
+      ta.appendChild(be); ta.appendChild(bd); tr.appendChild(ta);
+      tb.appendChild(tr);
+    });
+  }
+
+  /* ---------- dialogs ---------- */
+  var lastFocus;
+  function open(id) { lastFocus = document.activeElement; $(id).hidden = false; var f = $(id).querySelector("input, select, button"); if (f) f.focus(); }
+  function close(id) { $(id).hidden = true; if (lastFocus) lastFocus.focus(); }
+  document.querySelectorAll(".scrim").forEach(function (s) {
+    s.addEventListener("click", function (e) { if (e.target === s || e.target.hasAttribute("data-close")) close(s.id); });
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") document.querySelectorAll(".scrim:not([hidden])").forEach(function (s) { close(s.id); }); });
+
+  /* ---------- add / edit ---------- */
+  var plan = "";
+  function setPlanPreview(src, note) {
+    var pv = $("pv"); pv.innerHTML = "";
+    if (src) { var im = new Image(); im.src = src; im.onerror = function () { pv.textContent = "Processing…"; }; pv.appendChild(im); } else pv.textContent = "None";
+    $("b-rmplan").hidden = !plan;
+    $("upl").hidden = !note; $("upl").textContent = note || "";
+  }
+  function editSuite(s) {
+    state.editing = s || null;
+    $("edit-title").textContent = s ? "Edit suite" : "Add a suite";
+    $("s-building").value = s ? s.building : ($("filter-b").value || "");
+    $("s-suite").value = s ? s.suite : ""; $("s-sf").value = s ? s.sf : ""; $("s-floor").value = s ? s.floor : "";
+    $("s-notes").value = s ? s.notes : ""; $("s-show").checked = s ? s.show : true;
+    plan = s ? s.floorplan : ""; setPlanPreview(plan);
+    $("e-suite").hidden = true; open("dlg-edit");
+  }
+  $("b-add").addEventListener("click", function () { editSuite(null); });
+  $("b-rmplan").addEventListener("click", function (e) { e.stopPropagation(); plan = ""; setPlanPreview(""); });
+
+  $("f-suite").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (uploading) { $("e-suite").textContent = "Wait for the floorplan to finish uploading."; $("e-suite").hidden = false; return; }
+    var s = state.editing || {}, b = $("b-save"); $("e-suite").hidden = true; busy(b, true, "Saving…");
+    api("saveSuite", { suite: { id: s.id, building: $("s-building").value, suite: $("s-suite").value, sf: $("s-sf").value,
+      floor: $("s-floor").value, floorplan: plan, pdf: s.pdf || "", notes: $("s-notes").value, show: $("s-show").checked } })
+      .then(function (j) { state.status = j.status; close("dlg-edit"); toast("Saved. Click Publish when you're ready for it to go live."); return refresh(); })
+      .catch(function (err) { $("e-suite").textContent = err.message; $("e-suite").hidden = false; })
+      .then(function () { busy(b, false); });
+  });
+
+  /* ---------- floorplan upload (auto-shrinks large images) ---------- */
+  var uploading = false;
+  var drop = $("drop"), file = $("s-file");
+  drop.addEventListener("click", function () { file.click(); });
+  drop.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); file.click(); } });
+  ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("over"); }); });
+  ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("over"); }); });
+  drop.addEventListener("drop", function (e) { if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+  file.addEventListener("change", function () { if (file.files[0]) handleFile(file.files[0]); file.value = ""; });
+
+  function handleFile(f) {
+    if (!/^image\/(png|jpeg)$/.test(f.type)) { toast("Please choose a PNG or JPG image.", true); return; }
+    uploading = true; $("b-save").disabled = true;
+    setPlanPreview(URL.createObjectURL(f), "Preparing…");
+    shrink(f).then(function (out) {
+      setPlanPreview(out.dataUrl, "Uploading " + Math.round(out.bytes / 1024) + " KB…");
+      return api("upload", { file: { name: f.name, mime: out.mime, data: out.dataUrl } }).then(function (j) {
+        plan = j.url; setPlanPreview(out.dataUrl, "Uploaded ✓ (" + Math.round(out.bytes / 1024) + " KB). Remember to Save.");
+      });
+    }).catch(function (err) { setPlanPreview(plan, ""); toast(err.message || "Upload failed.", true); })
+      .then(function () { uploading = false; $("b-save").disabled = false; });
+  }
+  // Resize to at most 2000px wide; keep PNG for crisp line drawings unless JPG is much smaller.
+  function shrink(f) {
+    return new Promise(function (res, rej) {
+      var img = new Image(), url = URL.createObjectURL(f);
+      img.onload = function () {
+        var scale = Math.min(1, 2000 / img.naturalWidth), w = Math.round(img.naturalWidth * scale), h = Math.round(img.naturalHeight * scale);
+        var c = document.createElement("canvas"); c.width = w; c.height = h;
+        var g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, w, h); g.drawImage(img, 0, 0, w, h);
+        var png = c.toDataURL("image/png"), jpg = c.toDataURL("image/jpeg", 0.88);
+        var usePng = png.length < 900 * 1365 || png.length < jpg.length * 1.6;
+        var d = usePng ? png : jpg;
+        URL.revokeObjectURL(url);
+        res({ dataUrl: d, mime: usePng ? "image/png" : "image/jpeg", bytes: Math.round((d.length - d.indexOf(",") - 1) * 0.75) });
+      };
+      img.onerror = function () { rej(new Error("That image couldn't be read.")); };
+      img.src = url;
+    });
+  }
+
+  /* ---------- delete ---------- */
+  var toDelete = null;
+  function askDelete(s) { toDelete = s; $("del-text").textContent = bName(s.building) + ", Suite " + s.suite + " (" + fmtSF(s.sf) + ")"; open("dlg-del"); }
+  $("b-del").addEventListener("click", function () {
+    var b = $("b-del"); busy(b, true, "Deleting…");
+    api("deleteSuite", { id: toDelete.id }).then(function () { close("dlg-del"); toast("Deleted. Publish to remove it from the website."); return refresh(); })
+      .catch(function (err) { toast(err.message, true); }).then(function () { busy(b, false); });
+  });
+
+  /* ---------- publish ---------- */
+  $("b-publish").addEventListener("click", function () {
+    var b = $("b-publish"); busy(b, true, "Publishing…");
+    api("publish").then(function (j) { state.status = j.status; renderStatus(); toast("Published " + j.count + " suites. The website updates within about a minute."); })
+      .catch(function (err) { toast(err.message, true); }).then(function () { busy(b, false); renderStatus(); });
+  });
+
+  /* ---------- tabs + history ---------- */
+  document.querySelectorAll("[data-tab]").forEach(function (t) {
+    t.addEventListener("click", function () {
+      document.querySelectorAll("[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", x === t); });
+      $("tab-availability").hidden = t.dataset.tab !== "availability";
+      $("tab-history").hidden = t.dataset.tab !== "history";
+      if (t.dataset.tab === "history") loadHistory(); else refresh();
+    });
+  });
+  $("b-refresh-h").addEventListener("click", loadHistory);
+  function loadHistory() {
+    var ul = $("history"); ul.innerHTML = '<li class="hint">Loading…</li>';
+    api("history").then(function (j) {
+      ul.innerHTML = "";
+      if (!j.entries.length) ul.appendChild(el("li", "hint", "Nothing yet."));
+      j.entries.forEach(function (h) {
+        var li = el("li");
+        li.appendChild(el("div", "when", new Date(h.time).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" }) + " · " + h.email));
+        li.appendChild(el("div", null, h.action + (h.item ? ": " + h.item : "")));
+        if (h.details) li.appendChild(el("div", "det", h.details));
+        ul.appendChild(li);
+      });
+    }).catch(function (err) { ul.innerHTML = ""; toast(err.message, true); });
+  }
+
+  /* ---------- start ---------- */
+  var s = stored();
+  if (s) { state.token = s.token; state.me = s.me; startApp(); } else showLogin();
+})();
+</script>
+</body>
+</html>
