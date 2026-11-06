@@ -87,7 +87,33 @@
   .pill.on { color: var(--ok); border-color: var(--ok); }
   .pill.offp { color: var(--muted); border-color: var(--line); }
   .pill.ready { color: var(--gold-dark); border-color: var(--gold); background: #f4ecdc; }
-  .type-campus { color: var(--muted); font-size: 13px; }
+  /* Reserve Ready toggle (list) */
+  .rr { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border: 1px solid var(--line); background: #fff; cursor: pointer;
+        font-size: 11px; text-transform: uppercase; letter-spacing: .075em; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .rr:hover:not(:disabled) { border-color: var(--gold); color: var(--gold-dark); }
+  .rr[aria-pressed="true"] { background: #f4ecdc; border-color: var(--gold); color: var(--gold-dark); }
+  .rr:disabled { opacity: .6; cursor: default; }
+  /* Reserve Ready switch (add/edit window) */
+  .rrbox { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid var(--line); background: #fff; cursor: pointer; margin-bottom: 16px; }
+  .rrbox.on { border-color: var(--gold); background: #fbf6ec; }
+  .rrbox .t { flex: 1; }
+  .rrbox .t b { display: block; text-transform: uppercase; letter-spacing: .075em; font-size: 13px; color: var(--gold-dark); }
+  .rrbox .t small { color: var(--muted); font-size: 13px; }
+  .tog { position: relative; width: 46px; height: 26px; flex: none; }
+  .tog input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+  .tog span { position: absolute; inset: 0; background: #cfc6b6; border-radius: 13px; transition: background .2s; pointer-events: none; }
+  .tog span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+  .tog input:checked + span { background: var(--gold); }
+  .tog input:checked + span::after { transform: translateX(20px); }
+  .tog input:focus-visible + span { outline: 2px solid var(--gold-dark); outline-offset: 2px; }
+  .tog.sm { display: inline-block; width: 36px; height: 20px; vertical-align: middle; }
+  .tog.sm span { border-radius: 10px; }
+  .tog.sm span::after { top: 2px; left: 2px; width: 16px; height: 16px; }
+  .tog.sm input:checked + span::after { transform: translateX(16px); }
+  .tog.busy { opacity: .5; }
+  .rr-l { margin-left: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .075em; font-weight: 700; color: var(--muted); vertical-align: middle; }
+  .rr-l.on { color: var(--gold-dark); }
+  .banner { background: #f3dcd3; color: var(--warn); padding: 10px 0; font-size: 14px; }
   .bgrid { background: var(--paper); padding: 8px 18px 4px; max-width: 640px; }
   .brow { display: grid; grid-template-columns: 56px 1fr; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
   .brow:last-child { border-bottom: 0; }
@@ -134,7 +160,10 @@
     .grid td.c-b { display: block; font-weight: 700; }
     .grid td.c-sf::before, .grid td.c-fl:not(:empty)::before { content: " · "; color: var(--muted); }
     .grid td.c-f { position: absolute; top: 12px; right: 14px; }
-    .grid td.c-on, .grid td.c-t { display: inline-block; margin: 6px 8px 0 0; }
+    .grid td.c-on, .grid td.c-t { display: inline-block; margin: 6px 10px 0 0; }
+    .rr-l::before { content: "Reserve Ready: "; }
+    .filters { flex-wrap: wrap; width: 100%; }
+    .filters select { flex: 1 1 140px; }
     .grid td.act { display: block; text-align: left; padding-top: 8px; }
   }
 </style>
@@ -186,6 +215,7 @@
       <button role="tab" disabled title="Coming soon">Amenities</button>
     </div>
   </nav>
+  <div class="banner" id="ver-banner" hidden><div class="wrap"><b>Setup needed:</b> the editor was updated but the Apps Script web app is still running older code. In Apps Script: Deploy → Manage deployments → ✏️ Edit → Version: <b>New version</b> → Deploy. Then refresh this page.</div></div>
   <div class="pubbar">
     <div class="wrap">
       <div class="pubstate" id="pubstate"></div>
@@ -205,7 +235,7 @@
           </div>
         </div>
         <table class="grid">
-          <thead><tr><th>Building</th><th>Suite</th><th>Size</th><th>Floor</th><th>Type</th><th>Floorplan</th><th>On website</th><th></th></tr></thead>
+          <thead><tr><th>Building</th><th>Suite</th><th>Size</th><th>Floor</th><th>★ Reserve Ready</th><th>Floorplan</th><th>On website</th><th></th></tr></thead>
           <tbody id="rows"></tbody>
         </table>
         <div class="empty" id="empty" hidden>No suites yet. Click “+ Add suite” to add one.</div>
@@ -236,8 +266,10 @@
         <label class="f"><span>Size (SF)</span><input type="text" id="s-sf" inputmode="numeric" placeholder="e.g. 2450" required></label>
         <label class="f"><span>Floor</span><input type="text" id="s-floor" placeholder="e.g. 2nd Floor"></label>
       </div>
-      <label class="f"><span>Space type</span><select id="s-type"></select>
-        <div class="hint">Reserve Ready Suites get a ★ callout on the website.</div></label>
+      <label class="rrbox" id="rrbox">
+        <span class="tog"><input type="checkbox" id="s-ready"><span></span></span>
+        <span class="t"><b>★ Reserve Ready Suite</b><small>On: gets the ★ Reserve Ready callout on the website. Off: standard campus availability.</small></span>
+      </label>
       <div class="f">
         <label for="s-file" style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:.075em;font-weight:700;color:var(--gold-dark);margin-bottom:6px">Floorplan</label>
         <div class="drop" id="drop" tabindex="0">
@@ -292,7 +324,8 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var state = { token: null, me: null, suites: [], buildings: [], status: {}, editing: null, publicBase: "", types: [] };
-  var READY = "Reserve Ready Suite";
+  var READY = "Reserve Ready Suite", CAMPUS = "Campus Availability";
+  var BACKEND_VERSION = "3";   // must match CONFIG.VERSION in Code.gs
   function PUBLIC_BASE() { return state.publicBase || "https://thereservebellevue.github.io/web/"; }
   var SKEY = "reserve-editor-session";
 
@@ -367,7 +400,8 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   function refresh() {
     return api("load").then(function (j) {
       state.suites = j.suites; state.buildings = j.buildings; state.status = j.status; state.publicBase = j.publicBase;
-      state.types = j.types || ["Campus Availability", READY];
+      state.types = j.types || [CAMPUS, READY];
+      $("ver-banner").hidden = String(j.version || "") === BACKEND_VERSION;
       fillBuildingSelects(); fillTypeSelects(); renderRows(); renderStatus(); renderBuildings();
     }).catch(function (err) { toast(err.message, true); });
   }
@@ -383,8 +417,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   function fillTypeSelects() {
     var f = $("filter-t"), keep = f.value; f.length = 1;
     state.types.forEach(function (t) { f.appendChild(new Option(t, t)); }); f.value = keep;
-    var s = $("s-type"); s.length = 0;
-    state.types.forEach(function (t) { s.appendChild(new Option(t === READY ? "★ " + t : t, t)); });
+
   }
 
   function renderStatus() {
@@ -412,8 +445,13 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
       tr.appendChild(el("td", "c-sf", fmtSF(s.sf)));
       tr.appendChild(el("td", "c-fl", s.floor));
       var tt = el("td", "c-t");
-      if (s.type === READY) tt.appendChild(el("span", "pill ready", "★ Reserve Ready"));
-      else tt.appendChild(el("span", "type-campus", "Campus"));
+      var sw = el("label", "tog sm"), cb = el("input"), knob = el("span");
+      cb.type = "checkbox"; cb.checked = s.type === READY;
+      cb.setAttribute("aria-label", "Reserve Ready Suite: " + bName(s.building) + ", Suite " + s.suite);
+      sw.title = cb.checked ? "Reserve Ready. Click to make it a standard availability" : "Standard availability. Click to mark as Reserve Ready";
+      cb.addEventListener("change", function () { quickReady(s, cb, sw); });
+      sw.appendChild(cb); sw.appendChild(knob); tt.appendChild(sw);
+      tt.appendChild(el("span", "rr-l" + (cb.checked ? " on" : ""), cb.checked ? "Yes" : "No"));
       tr.appendChild(tt);
       var tf = el("td", "c-f");
       if (s.floorplan) {
@@ -460,11 +498,27 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
     $("s-building").value = s ? s.building : ($("filter-b").value || "");
     $("s-suite").value = s ? s.suite : ""; $("s-sf").value = s ? s.sf : ""; $("s-floor").value = s ? s.floor : "";
     $("s-notes").value = s ? s.notes : ""; $("s-show").checked = s ? s.show : true;
-    $("s-type").value = s ? s.type : ($("filter-t").value || state.types[0]);
+    $("s-ready").checked = s ? s.type === READY : $("filter-t").value === READY; syncRR();
     plan = s ? s.floorplan : ""; setPlanPreview(plan);
     $("e-suite").hidden = true; open("dlg-edit");
   }
   $("b-add").addEventListener("click", function () { editSuite(null); });
+  function syncRR() { $("rrbox").classList.toggle("on", $("s-ready").checked); }
+  $("s-ready").addEventListener("change", syncRR);
+
+  // one-click Reserve Ready on/off from the list
+  function quickReady(s, cb, sw) {
+    var to = s.type === READY ? CAMPUS : READY;
+    cb.disabled = true; sw.classList.add("busy");
+    api("saveSuite", { suite: { id: s.id, building: s.building, suite: s.suite, sf: s.sf, floor: s.floor, type: to,
+      floorplan: s.floorplan, pdf: s.pdf, notes: s.notes, show: s.show } })
+      .then(function (j) {
+        if (j.status) state.status = j.status;
+        toast(to === READY ? "Marked as Reserve Ready. Publish to update the website." : "Changed to standard availability. Publish to update the website.");
+        return refresh();
+      })
+      .catch(function (err) { toast(err.message, true); renderRows(); });
+  }
   $("b-rmplan").addEventListener("click", function (e) { e.stopPropagation(); plan = ""; setPlanPreview(""); });
 
   $("f-suite").addEventListener("submit", function (e) {
@@ -472,7 +526,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
     if (uploading) { $("e-suite").textContent = "Wait for the floorplan to finish uploading."; $("e-suite").hidden = false; return; }
     var s = state.editing || {}, b = $("b-save"); $("e-suite").hidden = true; busy(b, true, "Saving…");
     api("saveSuite", { suite: { id: s.id, building: $("s-building").value, suite: $("s-suite").value, sf: $("s-sf").value,
-      floor: $("s-floor").value, type: $("s-type").value, floorplan: plan, pdf: s.pdf || "", notes: $("s-notes").value, show: $("s-show").checked } })
+      floor: $("s-floor").value, type: $("s-ready").checked ? READY : CAMPUS, floorplan: plan, pdf: s.pdf || "", notes: $("s-notes").value, show: $("s-show").checked } })
       .then(function (j) { state.status = j.status; close("dlg-edit"); toast("Saved. Click Publish when you're ready for it to go live."); return refresh(); })
       .catch(function (err) { $("e-suite").textContent = err.message; $("e-suite").hidden = false; })
       .then(function () { busy(b, false); });
