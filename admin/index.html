@@ -171,6 +171,10 @@
   .ccard input.changed { border-color: var(--gold); background: #fffaf0; }
   .ccard .n { font-size: 11.5px; text-transform: uppercase; letter-spacing: .075em; font-weight: 700; color: var(--muted); margin-bottom: 10px; }
   .ccard label.f { margin-bottom: 10px; }
+  /* campus map tab */
+  table.cm .c-t2 { color: var(--muted); font-size: 13px; display: block; max-width: 460px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  table.cm .c-b b { display: block; }
+  table.cm .thumb.ph { cursor: default; }
   .empty { text-align: center; padding: 40px 12px; color: var(--muted); background: var(--paper); }
 
   .history { list-style: none; margin: 0; padding: 0; background: var(--paper); }
@@ -265,8 +269,8 @@
       <button role="tab" aria-selected="true" data-tab="availability">Availability</button>
       <button role="tab" aria-selected="false" data-tab="buildings">Buildings</button>
       <button role="tab" aria-selected="false" data-tab="pdfs">PDFs</button>
+      <button role="tab" aria-selected="false" data-tab="campus">Campus Map</button>
       <button role="tab" aria-selected="false" data-tab="history">History</button>
-      <button role="tab" disabled title="Coming soon">Campus Map</button>
       <button role="tab" disabled title="Coming soon">Amenities</button>
     </div>
   </nav>
@@ -310,6 +314,17 @@
         <h3 class="sub">Contacts on every PDF <small>(up to 3, left to right)</small></h3>
         <form class="cgrid" id="f-contacts"></form>
         <div class="actions" style="justify-content:flex-start;margin-top:14px"><button class="btn" id="b-save-c" disabled>Save contacts</button></div>
+      </section>
+
+      <section id="tab-campus" hidden>
+        <div class="toolbar"><h2>Campus Map</h2></div>
+        <p class="intro">Photos and text for the <b>Campus</b> page. Click <b>Edit</b> on a row to change it, then <b>Publish</b>. Building names and addresses come from the Buildings tab.</p>
+        <h3 class="sub">Intro</h3>
+        <table class="grid cm"><tbody id="cm-intro"></tbody></table>
+        <h3 class="sub" style="margin-top:26px">Map key + Cafe</h3>
+        <table class="grid cm"><thead><tr><th>Photo</th><th>Spot</th><th>On map</th><th>Clickable</th><th></th></tr></thead><tbody id="cm-spots"></tbody></table>
+        <h3 class="sub" style="margin-top:26px">Buildings</h3>
+        <table class="grid cm"><thead><tr><th>Photo</th><th>Building</th><th>On map</th><th>Clickable</th><th></th></tr></thead><tbody id="cm-bldgs"></tbody></table>
       </section>
 
       <section id="tab-history" hidden>
@@ -388,6 +403,37 @@
       <div class="actions">
         <button type="button" class="btn ghost" data-close>Cancel</button>
         <button type="submit" class="btn" id="b-save">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- campus map spot dialog -->
+<div class="scrim" id="dlg-campus" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="cm-title">
+    <h3 id="cm-title">Edit</h3>
+    <form id="f-campus">
+      <label class="f" id="cm-name-wrap"><span id="cm-name-lab">Name</span><input type="text" id="cm-name" maxlength="60"></label>
+      <p class="hint" id="cm-bnote" hidden style="margin:-6px 0 14px"></p>
+      <label class="f" id="cm-rsf-wrap" hidden><span>RSF <small style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted)">(whole building, optional)</small></span>
+        <input type="text" id="cm-rsf" inputmode="numeric" placeholder="e.g. 52000"></label>
+      <label class="f" id="cm-text-wrap"><span id="cm-text-lab">Text</span><textarea id="cm-text" maxlength="1500" rows="5"></textarea></label>
+      <div class="f" id="cm-photo-wrap">
+        <label for="cm-file" class="flab">Photo</label>
+        <div class="drop" id="cm-drop" tabindex="0">
+          <div class="pv" id="cm-pv">None</div>
+          <div class="txt"><b>Drop a photo here</b>, or click to choose.<div class="hint">Landscape photos look best (shown at 3:2). Big photos are shrunk automatically.</div>
+            <div id="cm-upl" class="hint" hidden></div>
+            <button type="button" class="link" id="cm-rm" hidden>Remove photo</button></div>
+        </div>
+        <input type="file" id="cm-file" accept="image/png,image/jpeg" hidden>
+      </div>
+      <label class="switch" id="cm-show-wrap" style="margin-top:14px"><input type="checkbox" id="cm-show"> Show on the map</label>
+      <label class="switch" id="cm-click-wrap"><input type="checkbox" id="cm-click"> Clickable (opens the photo + text)</label>
+      <p class="err" id="e-campus" hidden></p>
+      <div class="actions">
+        <button type="button" class="btn ghost" data-close>Cancel</button>
+        <button type="submit" class="btn" id="b-save-cm">Save</button>
       </div>
     </form>
   </div>
@@ -693,7 +739,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   var $ = function (id) { return document.getElementById(id); };
   var state = { token: null, me: null, suites: [], buildings: [], status: {}, editing: null, publicBase: "", types: [], contacts: [] };
   var READY = "Reserve Ready Suite", CAMPUS = "Campus Availability";
-  var BACKEND_VERSION = "6";   // must match CONFIG.VERSION in Code.gs
+  var BACKEND_VERSION = "7";   // must match CONFIG.VERSION in Code.gs
   function PUBLIC_BASE() { return state.publicBase || "https://thereservebellevue.github.io/web/"; }
   var SKEY = "reserve-editor-session";
 
@@ -768,9 +814,9 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   function refresh() {
     return api("load").then(function (j) {
       state.suites = j.suites; state.buildings = j.buildings; state.status = j.status; state.publicBase = j.publicBase;
-      state.types = j.types || [CAMPUS, READY]; state.contacts = j.contacts || [];
+      state.types = j.types || [CAMPUS, READY]; state.contacts = j.contacts || []; state.campus = j.campus || [];
       $("ver-banner").hidden = String(j.version || "") === BACKEND_VERSION;
-      fillBuildingSelects(); fillTypeSelects(); renderRows(); renderStatus(); renderBuildings(); renderContacts();
+      fillBuildingSelects(); fillTypeSelects(); renderRows(); renderStatus(); renderBuildings(); renderContacts(); renderCampus();
     }).catch(function (err) { toast(err.message, true); });
   }
   function fillBuildingSelects() {
@@ -1088,7 +1134,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   /* ---------- publish ---------- */
   $("b-publish").addEventListener("click", function () {
     var b = $("b-publish"); busy(b, true, "Publishing…");
-    api("publish").then(function (j) { state.status = j.status; renderStatus(); toast("Published " + j.count + " suites. The website updates within about a minute."); })
+    api("publish").then(function (j) { state.status = j.status; renderStatus(); toast("Published " + j.count + " suites and the campus map. The website updates within about a minute."); })
       .catch(function (err) { toast(err.message, true); }).then(function () { busy(b, false); renderStatus(); });
   });
 
@@ -1260,11 +1306,108 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
     }).catch(function (err) { toast(err.message, true); }).then(function () { busy(b, false); markContacts(); });
   });
 
+  /* ---------- campus map (photos + text for the Campus page) ---------- */
+  var cmEditing = null, cmImage = "", cmUploading = false;
+  function cmLabel(c) {
+    if (c.key === "intro") return "Intro: " + (c.name || "");
+    if (/^b\d+$/.test(c.key)) return bName(Number(c.key.slice(1)));
+    return c.name;
+  }
+  function renderCampus() {
+    if (!state.campus) return;
+    var groups = { intro: $("cm-intro"), spots: $("cm-spots"), bldgs: $("cm-bldgs") };
+    Object.keys(groups).forEach(function (k) { groups[k].innerHTML = ""; });
+    state.campus.forEach(function (c) {
+      var isB = /^b\d+$/.test(c.key), isIntro = c.key === "intro";
+      var tb = isIntro ? groups.intro : isB ? groups.bldgs : groups.spots;
+      var tr = el("tr", c.show ? "" : "off");
+      if (!isIntro) {
+        var tf = el("td", "c-f");
+        if (c.image) {
+          var th = el("button", "thumb"); th.type = "button"; th.title = "View photo";
+          var im = new Image(); im.alt = ""; im.loading = "lazy"; im.src = planData[c.image] || c.image;
+          im.onerror = function () { th.textContent = "Processing\u2026"; th.title = "New photos appear within about a minute"; };
+          th.appendChild(im); th.addEventListener("click", function () { $("view-img").src = planData[c.image] || c.image; open("dlg-view"); });
+          tf.appendChild(th);
+        } else if (c.key !== "roads") { var ph = el("span", "thumb ph", "No photo"); tf.appendChild(ph); }
+        tr.appendChild(tf);
+      }
+      var tn = el("td", "c-b"); tn.appendChild(el("b", null, cmLabel(c)));
+      var meta = [];
+      if (isB) { var b = state.buildings.find(function (x) { return x.number === Number(c.key.slice(1)); }) || {}; if (b.address) meta.push(b.address); if (c.rsf) meta.push(Number(c.rsf).toLocaleString("en-US") + " RSF"); }
+      if (meta.length) tn.appendChild(el("span", "c-t2", meta.join(" \u00b7 ")));
+      tn.appendChild(el("span", "c-t2", c.key === "roads" ? "Shown in the map key (not clickable)" : (c.text || "No text yet")));
+      if (isIntro) tn.colSpan = 3;
+      tr.appendChild(tn);
+      if (!isIntro) {
+        var to = el("td", "c-on"); to.appendChild(el("span", "pill " + (c.show ? "on" : "offp"), c.show ? "Shown" : "Hidden")); tr.appendChild(to);
+        var tc = el("td", "c-on"); tc.appendChild(el("span", "pill " + (c.clickable && c.show ? "on" : "offp"), c.key === "roads" ? "Never" : c.clickable ? "Yes" : "No")); tr.appendChild(tc);
+      }
+      var ta = el("td", "act"); var be = el("button", "link", "Edit"); be.type = "button";
+      be.addEventListener("click", function () { editCampus(c); }); ta.appendChild(be); tr.appendChild(ta);
+      tb.appendChild(tr);
+    });
+  }
+  function setCmPreview(src, note) {
+    var pv = $("cm-pv"); pv.innerHTML = "";
+    if (src) { var im = new Image(); im.src = planData[src] || src; im.onerror = function () { pv.textContent = "Processing\u2026"; }; pv.appendChild(im); } else pv.textContent = "None";
+    $("cm-rm").hidden = !cmImage;
+    $("cm-upl").hidden = !note; $("cm-upl").textContent = note || "";
+  }
+  function editCampus(c) {
+    cmEditing = c; cmImage = c.image || "";
+    var isB = /^b\d+$/.test(c.key), isIntro = c.key === "intro", isRoads = c.key === "roads";
+    $("cm-title").textContent = isIntro ? "Edit intro" : "Edit " + cmLabel(c);
+    $("cm-name-wrap").hidden = isB; $("cm-name").value = c.name || "";
+    $("cm-name-lab").textContent = isIntro ? "Title" : "Name (shown in the key + on the card)";
+    var b = isB ? (state.buildings.find(function (x) { return x.number === Number(c.key.slice(1)); }) || {}) : null;
+    $("cm-bnote").hidden = !isB;
+    if (isB) $("cm-bnote").textContent = "Name and address (" + (b.name || "") + (b.address ? ", " + b.address : "") + ") come from the Buildings tab.";
+    $("cm-rsf-wrap").hidden = !isB; $("cm-rsf").value = c.rsf || "";
+    $("cm-text-wrap").hidden = isRoads; $("cm-text").value = c.text || "";
+    $("cm-text-lab").textContent = isIntro ? "Intro text" : "Text";
+    $("cm-photo-wrap").hidden = isIntro || isRoads; setCmPreview(cmImage);
+    $("cm-show-wrap").hidden = isIntro; $("cm-show").checked = c.show !== false;
+    $("cm-click-wrap").hidden = isIntro || isRoads; $("cm-click").checked = c.clickable !== false;
+    $("e-campus").hidden = true; open("dlg-campus");
+  }
+  $("f-campus").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (cmUploading) { $("e-campus").textContent = "Wait for the photo to finish uploading."; $("e-campus").hidden = false; return; }
+    var b = $("b-save-cm"), c = cmEditing; $("e-campus").hidden = true; busy(b, true, "Saving\u2026");
+    api("saveCampus", { spot: { key: c.key, name: $("cm-name").value, text: $("cm-text").value, image: cmImage, rsf: $("cm-rsf").value,
+      show: $("cm-show").checked, clickable: $("cm-click").checked } })
+      .then(function (j) { state.campus = j.campus; state.status = j.status; renderCampus(); renderStatus(); close("dlg-campus");
+        toast("Saved. Click Publish when you're ready for it to go live."); })
+      .catch(function (err) { $("e-campus").textContent = err.message; $("e-campus").hidden = false; })
+      .then(function () { busy(b, false); });
+  });
+  var cmDrop = $("cm-drop"), cmFile = $("cm-file");
+  cmDrop.addEventListener("click", function () { cmFile.click(); });
+  cmDrop.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); cmFile.click(); } });
+  ["dragenter", "dragover"].forEach(function (ev) { cmDrop.addEventListener(ev, function (e) { e.preventDefault(); cmDrop.classList.add("over"); }); });
+  ["dragleave", "drop"].forEach(function (ev) { cmDrop.addEventListener(ev, function (e) { e.preventDefault(); cmDrop.classList.remove("over"); }); });
+  cmDrop.addEventListener("drop", function (e) { if (e.dataTransfer.files[0]) cmHandle(e.dataTransfer.files[0]); });
+  cmFile.addEventListener("change", function () { if (cmFile.files[0]) cmHandle(cmFile.files[0]); cmFile.value = ""; });
+  $("cm-rm").addEventListener("click", function (e) { e.stopPropagation(); cmImage = ""; setCmPreview(""); });
+  function cmHandle(f) {
+    if (!/^image\/(png|jpeg)$/.test(f.type)) { toast("Please choose a PNG or JPG image.", true); return; }
+    cmUploading = true; $("b-save-cm").disabled = true;
+    setCmPreview(URL.createObjectURL(f), "Preparing\u2026");
+    shrink(f).then(function (out) {
+      setCmPreview(out.dataUrl, "Uploading " + Math.round(out.bytes / 1024) + " KB\u2026");
+      return api("upload", { file: { name: f.name, mime: out.mime, data: out.dataUrl, folder: "campus" } }).then(function (j) {
+        cmImage = j.url; planData[j.url] = out.dataUrl; setCmPreview(out.dataUrl, "Uploaded \u2713 Remember to Save.");
+      });
+    }).catch(function (err) { setCmPreview(cmImage, ""); toast(err.message || "Upload failed.", true); })
+      .then(function () { cmUploading = false; $("b-save-cm").disabled = false; });
+  }
+
   /* ---------- tabs + history ---------- */
   document.querySelectorAll("[data-tab]").forEach(function (t) {
     t.addEventListener("click", function () {
       document.querySelectorAll("[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", x === t); });
-      ["availability", "buildings", "pdfs", "history"].forEach(function (k) { $("tab-" + k).hidden = t.dataset.tab !== k; });
+      ["availability", "buildings", "pdfs", "campus", "history"].forEach(function (k) { $("tab-" + k).hidden = t.dataset.tab !== k; });
       if (t.dataset.tab === "history") loadHistory(); else refresh();
       if (t.dataset.tab === "pdfs") checkFonts();
     });
