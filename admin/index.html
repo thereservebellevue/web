@@ -32,7 +32,7 @@
   .link { background: none; border: 0; padding: 0; cursor: pointer; color: var(--gold-dark); text-decoration: underline; text-underline-offset: 3px; }
   label.f { display: block; margin-bottom: 16px; }
   label.f > span { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .075em; font-weight: 700; color: var(--gold-dark); margin-bottom: 6px; }
-  input[type=text], input[type=email], input[type=number], select, textarea {
+  input[type=text], input[type=email], input[type=number], input[type=date], input[type=time], select, textarea {
     width: 100%; padding: 11px 12px; border: 1px solid var(--line); background: #fff; border-radius: 0; }
   input:focus, select:focus, textarea:focus, .btn:focus-visible, .link:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
   textarea { min-height: 70px; resize: vertical; }
@@ -175,6 +175,34 @@
   table.cm .c-t2 { color: var(--muted); font-size: 13px; display: block; max-width: 460px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   table.cm .c-b b { display: block; }
   table.cm .thumb.ph { cursor: default; }
+  /* tenant portal tab */
+  .tp-sub { display: flex; flex-wrap: wrap; gap: 0; margin: 0 0 18px; }
+  .tp-sub button { font: inherit; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .075em; padding: 9px 14px;
+    border: 1px solid var(--gold); background: transparent; color: var(--gold-dark); cursor: pointer; margin: 0 -1px -1px 0; }
+  .tp-sub button[aria-pressed="true"] { background: var(--gold); color: #fff; }
+  .tp-sub .n { font-weight: 500; opacity: .8; }
+  table.tpl td.mv { white-space: nowrap; width: 1%; }
+  table.tpl .mvb { border: 1px solid var(--line); background: #fff; width: 28px; height: 28px; cursor: pointer; font-size: 13px; }
+  table.tpl .mvb:disabled { opacity: .35; cursor: default; }
+  table.tpl .sub2 { display: block; color: var(--muted); font-size: 13px; max-width: 560px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  table.tpl tr.past td:not(.act) { color: var(--muted); }
+  .flag { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .075em; text-transform: uppercase; padding: 2px 7px; border: 1px solid; margin-left: 8px; vertical-align: 1px; }
+  .flag.warn { color: var(--warn); } .flag.ok { color: var(--ok); } .flag.mut { color: var(--muted); border-color: var(--line); }
+  .st-open { color: var(--ok); } .st-seasonal { color: var(--gold-dark); } .st-closed { color: var(--warn); } .st-soon { color: var(--ink); }
+  .tp-form { background: var(--paper); padding: 20px 22px 6px; max-width: 760px; }
+  .tp-form h3 { margin: 4px 0 14px; font-size: 14px; text-transform: uppercase; letter-spacing: .075em; }
+  .days { display: flex; flex-wrap: wrap; gap: 6px; }
+  .days label { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line); background: #fff; padding: 6px 9px; font-size: 13px; cursor: pointer; }
+  .days label.on { border-color: var(--gold); background: #f4ecdc; }
+  .days input { accent-color: var(--gold-dark); margin: 0; }
+  .linkrow { display: flex; gap: 8px; }
+  .linkrow input { flex: 1; }
+  .linkrow .btn { padding: 0 12px; font-size: 11px; white-space: nowrap; }
+  .btnset { border: 1px solid var(--line); padding: 12px 12px 0; margin-bottom: 16px; background: #fff; }
+  .btnset .flab { margin-bottom: 10px; }
+  .imgrow { display: flex; gap: 14px; align-items: center; margin-bottom: 16px; }
+  .imgrow .pv { width: 120px; height: 68px; border: 1px solid var(--line); background: var(--cream); display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 11px; color: var(--muted); flex: none; }
+  .imgrow .pv img { width: 100%; height: 100%; object-fit: cover; }
   .empty { text-align: center; padding: 40px 12px; color: var(--muted); background: var(--paper); }
 
   .history { list-style: none; margin: 0; padding: 0; background: var(--paper); }
@@ -270,8 +298,8 @@
       <button role="tab" aria-selected="false" data-tab="buildings">Buildings</button>
       <button role="tab" aria-selected="false" data-tab="pdfs">PDFs</button>
       <button role="tab" aria-selected="false" data-tab="campus">Campus Map</button>
+      <button role="tab" aria-selected="false" data-tab="tenant">Tenant Portal</button>
       <button role="tab" aria-selected="false" data-tab="history">History</button>
-      <button role="tab" disabled title="Coming soon">Amenities</button>
     </div>
   </nav>
   <div class="banner" id="ver-banner" hidden><div class="wrap"><b>Setup needed:</b> the editor was updated but the Apps Script web app is still running older code. In Apps Script: Deploy → Manage deployments → ✏️ Edit → Version: <b>New version</b> → Deploy. Then refresh this page.</div></div>
@@ -325,6 +353,13 @@
         <table class="grid cm"><thead><tr><th>Photo</th><th>Spot</th><th>On map</th><th>Clickable</th><th></th></tr></thead><tbody id="cm-spots"></tbody></table>
         <h3 class="sub" style="margin-top:26px">Buildings</h3>
         <table class="grid cm"><thead><tr><th>Photo</th><th>Building</th><th>On map</th><th>Clickable</th><th></th></tr></thead><tbody id="cm-bldgs"></tbody></table>
+      </section>
+
+      <section id="tab-tenant" hidden>
+        <div class="toolbar"><h2>Tenant Portal</h2></div>
+        <p class="intro">Everything on the Tenant Portal page. Pick a section, make changes, then click <b>Publish</b>.</p>
+        <div class="tp-sub" role="group" aria-label="Tenant Portal sections" id="tp-sub"></div>
+        <div id="tp-pane"></div>
       </section>
 
       <section id="tab-history" hidden>
@@ -403,6 +438,21 @@
       <div class="actions">
         <button type="button" class="btn ghost" data-close>Cancel</button>
         <button type="submit" class="btn" id="b-save">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- tenant portal item dialog (fields are built by the script) -->
+<div class="scrim" id="dlg-tp" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="tp-title" style="max-width:620px">
+    <h3 id="tp-title">Edit</h3>
+    <form id="f-tp" novalidate>
+      <div id="tp-fields"></div>
+      <p class="err" id="e-tp" hidden></p>
+      <div class="actions">
+        <button type="button" class="btn ghost" data-close>Cancel</button>
+        <button type="submit" class="btn" id="b-save-tp">Save</button>
       </div>
     </form>
   </div>
@@ -739,7 +789,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   var $ = function (id) { return document.getElementById(id); };
   var state = { token: null, me: null, suites: [], buildings: [], status: {}, editing: null, publicBase: "", types: [], contacts: [] };
   var READY = "Reserve Ready Suite", CAMPUS = "Campus Availability";
-  var BACKEND_VERSION = "7";   // must match CONFIG.VERSION in Code.gs
+  var BACKEND_VERSION = "8";   // must match CONFIG.VERSION in Code.gs
   function PUBLIC_BASE() { return state.publicBase || "https://thereservebellevue.github.io/web/"; }
   var SKEY = "reserve-editor-session";
 
@@ -814,9 +864,9 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   function refresh() {
     return api("load").then(function (j) {
       state.suites = j.suites; state.buildings = j.buildings; state.status = j.status; state.publicBase = j.publicBase;
-      state.types = j.types || [CAMPUS, READY]; state.contacts = j.contacts || []; state.campus = j.campus || [];
+      state.types = j.types || [CAMPUS, READY]; state.contacts = j.contacts || []; state.campus = j.campus || []; state.tenant = j.tenant || null;
       $("ver-banner").hidden = String(j.version || "") === BACKEND_VERSION;
-      fillBuildingSelects(); fillTypeSelects(); renderRows(); renderStatus(); renderBuildings(); renderContacts(); renderCampus();
+      fillBuildingSelects(); fillTypeSelects(); renderRows(); renderStatus(); renderBuildings(); renderContacts(); renderCampus(); renderTenant();
     }).catch(function (err) { toast(err.message, true); });
   }
   function fillBuildingSelects() {
@@ -1134,7 +1184,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   /* ---------- publish ---------- */
   $("b-publish").addEventListener("click", function () {
     var b = $("b-publish"); busy(b, true, "Publishing…");
-    api("publish").then(function (j) { state.status = j.status; renderStatus(); toast("Published " + j.count + " suites and the campus map. The website updates within about a minute."); })
+    api("publish").then(function (j) { state.status = j.status; renderStatus(); toast("Published " + j.count + " suites, the campus map and the tenant portal. The website updates within about a minute."); })
       .catch(function (err) { toast(err.message, true); }).then(function () { busy(b, false); renderStatus(); });
   });
 
@@ -1403,11 +1453,297 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
       .then(function () { cmUploading = false; $("b-save-cm").disabled = false; });
   }
 
+  /* ---------- TENANT PORTAL ---------- */
+  // Fields for each list (the backend checks them again). t: text, long, date, time, link, email, days, choice, yesno, image
+  var TP_DEF = {
+    announcements: { label: "Happening Now", one: "announcement", order: true, fields: [
+      { k: "title", l: "Title", t: "text", max: 80, req: 1 },
+      { k: "text", l: "Text", t: "long", max: 400 },
+      { k: "link", l: "Link (optional)", t: "link" }, { k: "linkLabel", l: "Link text", t: "text", max: 30, ph: "Learn more" },
+      { k: "from", l: "Show from (optional)", t: "date", half: 1 }, { k: "until", l: "Show until", t: "date", half: 1, hint: "Disappears from the page by itself after this date." }] },
+    events: { label: "Events", one: "event", fields: [
+      { k: "title", l: "Title", t: "text", max: 80, req: 1 },
+      { k: "date", l: "Date (first date, if it repeats)", t: "date", req: 1 },
+      { k: "start", l: "Start time", t: "time", half: 1 }, { k: "end", l: "End time", t: "time", half: 1, hint: "Leave both blank for an all-day event." },
+      { k: "location", l: "Location", t: "text", max: 100, ph: "e.g. Gateway 112 lobby" },
+      { k: "text", l: "Description", t: "long", max: 800 },
+      { k: "repeatDays", l: "Repeats every week on (optional)", t: "days" },
+      { k: "repeatUntil", l: "Repeat until (optional)", t: "date", hint: "Leave blank to repeat with no end date." },
+      { k: "link", l: "Link or PDF (optional)", t: "link" }, { k: "linkLabel", l: "Link text", t: "text", max: 30, ph: "More info" }] },
+    amenities: { label: "Amenities", one: "amenity", order: true, fields: [
+      { k: "name", l: "Name", t: "text", max: 60, req: 1 },
+      { k: "category", l: "Category (filter button on the page)", t: "text", max: 40, list: ["Food & Drink", "Fitness & Wellness", "Outdoors", "Meeting Space", "Services"] },
+      { k: "status", l: "Status", t: "choice", half: 1, opts: [["open", "Open"], ["seasonal", "Seasonal"], ["closed", "Closed"], ["soon", "Coming soon"]] },
+      { k: "note", l: "Status note (optional)", t: "text", max: 40, half: 1, ph: "e.g. Back Summer 2027" },
+      { k: "hours", l: "Hours (optional)", t: "text", max: 60, ph: "e.g. Mon - Fri, 7:00 AM - 5:00 PM" },
+      { k: "text", l: "Description", t: "long", max: 600 },
+      { k: "image", l: "Photo", t: "image" },
+      { k: "buttons", l: "Buttons (up to 3)", t: "buttons" },
+      { k: "show", l: "Show on the page", t: "yesno" }] },
+    documents: { label: "Forms & Documents", one: "document", order: true, fields: [
+      { k: "title", l: "Title", t: "text", max: 80, req: 1 }, { k: "note", l: "Note (optional)", t: "text", max: 80, ph: "e.g. Fillable PDF" },
+      { k: "url", l: "PDF or link", t: "link", req: 1 }] },
+    contacts: { label: "Contacts", one: "contact", order: true, fields: [
+      { k: "name", l: "Name", t: "text", max: 60, req: 1 }, { k: "role", l: "Role / what to contact them about", t: "text", max: 80 },
+      { k: "phone", l: "Phone", t: "text", max: 30, half: 1 }, { k: "email", l: "Email", t: "email", half: 1 }, { k: "address", l: "Address", t: "text", max: 120 }] }
+  };
+  var TP_TABS = [["settings", "Intro + Connect"], ["announcements"], ["events"], ["amenities"], ["documents"], ["contacts"]];
+  var tpView = "events", tpEditing = null, tpList = null, tpShowPast = false;
+  var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function todayStr() { var t = new Date(); return t.getFullYear() + "-" + ("0" + (t.getMonth() + 1)).slice(-2) + "-" + ("0" + t.getDate()).slice(-2); }
+  function niceDate(s) { if (!s) return ""; var p = s.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]); return DOW[d.getDay()] + ", " + MON[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear(); }
+  function t12(hm) { if (!hm) return ""; var p = hm.split(":"), h = +p[0]; return ((h % 12) || 12) + (p[1] === "00" ? "" : ":" + p[1]) + " " + (h < 12 ? "AM" : "PM"); }
+  function daysTxt(d) {
+    if (!d) return ""; if (d === "1,2,3,4,5") return "Weekdays"; if (d === "0,1,2,3,4,5,6") return "Every day"; if (d === "0,6") return "Weekends";
+    return d.split(",").map(function (x) { return DOW[+x]; }).join(", ");
+  }
+  function tpLast(e) { return e.repeatDays ? (e.repeatUntil || "9999") : e.date; }   // last day an event happens
+
+  function renderTenant() {
+    if (!state.tenant) return;
+    var sub = $("tp-sub"); sub.innerHTML = "";
+    TP_TABS.forEach(function (t) {
+      var key = t[0], b = el("button"); b.type = "button"; b.setAttribute("aria-pressed", key === tpView);
+      b.appendChild(document.createTextNode(t[1] || TP_DEF[key].label));
+      if (key !== "settings") b.appendChild(el("span", "n", " (" + (state.tenant[key] || []).length + ")"));
+      b.addEventListener("click", function () { tpView = key; renderTenant(); });
+      sub.appendChild(b);
+    });
+    var pane = $("tp-pane"); pane.innerHTML = "";
+    if (tpView === "settings") return renderTpSettings(pane);
+    var def = TP_DEF[tpView], list = (state.tenant[tpView] || []).slice(), key = tpView, now = todayStr();
+    var bar = el("div", "toolbar");
+    var add = el("button", "btn", "+ Add " + def.one); add.type = "button"; add.addEventListener("click", function () { editTp(key, null); });
+    var left = el("div");
+    if (key === "events") {
+      list.sort(function (a, b) { return (a.date > b.date ? 1 : a.date < b.date ? -1 : 0) || String(a.start).localeCompare(String(b.start)); });
+      var past = list.filter(function (e) { return tpLast(e) < now; }).length;
+      if (past) {
+        var lab = el("label", "switch"); lab.style.margin = "0"; var cb = el("input"); cb.type = "checkbox"; cb.checked = tpShowPast;
+        cb.addEventListener("change", function () { tpShowPast = cb.checked; renderTenant(); });
+        lab.appendChild(cb); lab.appendChild(document.createTextNode(" Show " + past + " past event" + (past === 1 ? "" : "s"))); left.appendChild(lab);
+      }
+      if (!tpShowPast) list = list.filter(function (e) { return tpLast(e) >= now; });
+    } else if (def.order) left.appendChild(el("span", "hint", "Use ↑ ↓ to set the order they appear on the page."));
+    bar.appendChild(left); bar.appendChild(add); pane.appendChild(bar);
+    if (!list.length) { pane.appendChild(el("div", "empty", "Nothing here yet. Click “+ Add " + def.one + "”.")); return; }
+    var tbl = el("table", "grid tpl"), tb = el("tbody"); tbl.appendChild(tb);
+    list.forEach(function (it, i) {
+      var tr = el("tr");
+      if (key === "events" && tpLast(it) < now) tr.className = "past";
+      if (key === "announcements" && it.until && it.until < now) tr.className = "past";
+      if (key === "amenities" && !it.show) tr.className = "off";
+      if (key === "amenities") {
+        var tf = el("td", "c-f");
+        if (it.image) { var th = el("span", "thumb"); var im = new Image(); im.src = planData[it.image] || it.image; im.alt = ""; im.onerror = function () { th.textContent = "Processing…"; }; th.appendChild(im); tf.appendChild(th); }
+        else tf.appendChild(el("span", "thumb ph", "No photo"));
+        tr.appendChild(tf);
+      }
+      var tn = el("td", "c-b"), b = el("b", null, it.title || it.name || "");
+      tn.appendChild(b);
+      var sub2 = "", flag = null;
+      if (key === "events") {
+        var dt = daysTxt(it.repeatDays);
+        sub2 = (it.repeatDays ? (/^(Weekdays|Weekends|Every day)$/.test(dt) ? dt : "Every " + dt) + (it.repeatUntil ? " until " + niceDate(it.repeatUntil) : "") + " (from " + niceDate(it.date) + ")" : niceDate(it.date)) +
+          " · " + (it.start ? t12(it.start) + (it.end ? " – " + t12(it.end) : "") : "All day") + (it.location ? " · " + it.location : "");
+        if (tpLast(it) < now) flag = ["Past", "mut"]; else if (it.status === "pending") flag = ["Pending", "warn"]; else if (it.repeatDays) flag = ["Repeats", "ok"];
+      } else if (key === "announcements") {
+        sub2 = it.text || "";
+        if (it.until && it.until < now) flag = ["Ended " + niceDate(it.until), "mut"];
+        else if (it.from && it.from > now) flag = ["Starts " + niceDate(it.from), "mut"];
+        else flag = [it.until ? "Showing until " + niceDate(it.until) : "Showing", "ok"];
+      } else if (key === "amenities") {
+        var stl = { open: "Open", seasonal: "Seasonal", closed: "Closed", soon: "Coming soon" }[it.status] || "Open";
+        var st = el("span", "flag st-" + it.status, stl + (it.note ? " · " + it.note : "")); b.appendChild(st);
+        sub2 = [it.category, it.hours].filter(Boolean).join(" · ");
+        if (!it.show) flag = ["Hidden", "mut"];
+      } else if (key === "documents") { sub2 = [it.note, it.url].filter(Boolean).join(" · "); }
+      else if (key === "contacts") { sub2 = [it.role, it.phone, it.email].filter(Boolean).join(" · "); }
+      if (flag) b.appendChild(el("span", "flag " + flag[1], flag[0]));
+      if (sub2) tn.appendChild(el("span", "sub2", sub2));
+      tr.appendChild(tn);
+      if (def.order) {
+        var mv = el("td", "mv");
+        [["↑", -1, i === 0], ["↓", 1, i === list.length - 1]].forEach(function (m) {
+          var x = el("button", "mvb", m[0]); x.type = "button"; x.disabled = m[2]; x.setAttribute("aria-label", m[1] < 0 ? "Move up" : "Move down");
+          x.addEventListener("click", function () { tpMove(key, it.id, m[1]); }); mv.appendChild(x);
+        });
+        tr.appendChild(mv);
+      }
+      var ta = el("td", "act");
+      var be = el("button", "link", "Edit"); be.type = "button"; be.addEventListener("click", function () { editTp(key, it); });
+      var bd = el("button", "link del", "Delete"); bd.type = "button"; bd.addEventListener("click", function () { tpDelete(key, it); });
+      ta.appendChild(be); ta.appendChild(bd); tr.appendChild(ta);
+      tb.appendChild(tr);
+    });
+    pane.appendChild(tbl);
+  }
+  function tpMove(key, id, dir) {
+    api("tpMove", { list: key, id: id, dir: dir }).then(function (j) { state.tenant[key] = j.list; state.status = j.status; renderTenant(); renderStatus(); })
+      .catch(function (err) { toast(err.message, true); });
+  }
+  function tpDelete(key, it) {
+    if (!confirm("Delete “" + (it.title || it.name) + "”? It comes off the website at the next Publish.")) return;
+    api("tpDelete", { list: key, id: it.id }).then(function (j) { state.tenant[key] = j.list; state.status = j.status; renderTenant(); renderStatus(); toast("Deleted. Publish to update the website."); })
+      .catch(function (err) { toast(err.message, true); });
+  }
+
+  // intro + connect
+  function renderTpSettings(pane) {
+    var t = state.tenant, f = el("form", "tp-form");
+    function field(label, id, val, long, ph) {
+      var lb = el("label", "f"); lb.appendChild(el("span", null, label));
+      var inp = el(long ? "textarea" : "input"); if (!long) inp.type = "text"; inp.id = id; inp.value = val || ""; if (ph) inp.placeholder = ph;
+      lb.appendChild(inp); f.appendChild(lb);
+    }
+    f.appendChild(el("h3", null, "Top of the page"));
+    field("Page title", "tps-title", t.intro.title); field("Intro text", "tps-text", t.intro.text, true);
+    f.appendChild(el("h3", null, "“Connect with us” box (bottom of the page)"));
+    field("Heading", "tps-ctitle", t.connect.title); field("Text", "tps-ctext", t.connect.text, true);
+    field("Hashtag", "tps-hash", t.connect.hashtag, false, "#TheReserve");
+    field("Email for “Share your news”", "tps-email", t.connect.email);
+    field("Instagram link", "tps-ig", t.connect.instagram, false, "https://www.instagram.com/...");
+    field("Facebook link", "tps-fb", t.connect.facebook, false, "https://www.facebook.com/...");
+    var act = el("div", "actions"); act.style.justifyContent = "flex-start"; act.style.marginBottom = "16px";
+    var sv = el("button", "btn", "Save"); sv.type = "submit"; act.appendChild(sv); f.appendChild(act);
+    f.addEventListener("submit", function (e) {
+      e.preventDefault(); busy(sv, true, "Saving…");
+      var v = function (id) { return $(id).value; };
+      api("tpSettings", { intro: { title: v("tps-title"), text: v("tps-text") },
+        connect: { title: v("tps-ctitle"), text: v("tps-ctext"), hashtag: v("tps-hash"), email: v("tps-email"), instagram: v("tps-ig"), facebook: v("tps-fb") } })
+        .then(function (j) { t.intro = j.intro; t.connect = j.connect; state.status = j.status; renderStatus(); toast("Saved. Publish to update the website."); })
+        .catch(function (err) { toast(err.message, true); }).then(function () { busy(sv, false); });
+    });
+    pane.appendChild(f);
+  }
+
+  // add / edit dialog, built from TP_DEF
+  var tpUploads = 0;
+  function editTp(key, it) {
+    var def = TP_DEF[key]; tpEditing = { key: key, id: it ? it.id : null };
+    $("tp-title").textContent = (it ? "Edit " : "Add ") + def.one;
+    var box = $("tp-fields"); box.innerHTML = "";
+    var row = null;
+    def.fields.forEach(function (f) {
+      var val = it ? it[f.k] : (f.k === "status" ? (f.opts ? f.opts[0][0] : "") : f.t === "yesno" ? true : "");
+      var wrap;
+      if (f.t === "yesno") {
+        wrap = el("label", "switch"); var c = el("input"); c.type = "checkbox"; c.checked = val !== false; c.dataset.k = f.k; c.dataset.t = "yesno";
+        wrap.appendChild(c); wrap.appendChild(document.createTextNode(" " + f.l));
+      } else if (f.t === "buttons") {
+        wrap = el("div", "btnset"); wrap.appendChild(el("div", "flab", f.l));
+        [1, 2, 3].forEach(function (n) {
+          var two = el("div", "two");
+          var a = el("label", "f"); a.appendChild(el("span", null, "Button " + n + " text"));
+          var ai = el("input"); ai.type = "text"; ai.maxLength = 30; ai.dataset.k = "b" + n + "Label"; ai.value = it ? it["b" + n + "Label"] || "" : ""; a.appendChild(ai);
+          var b2 = el("label", "f"); b2.appendChild(el("span", null, "Button " + n + " link"));
+          b2.appendChild(linkInput("b" + n + "Url", it ? it["b" + n + "Url"] || "" : ""));
+          two.appendChild(a); two.appendChild(b2); wrap.appendChild(two);
+        });
+      } else if (f.t === "image") {
+        wrap = el("div"); wrap.appendChild(el("span", "flab", f.l));
+        var ir = el("div", "imgrow"), pv = el("div", "pv"), hid = el("input"); hid.type = "hidden"; hid.dataset.k = f.k; hid.value = val || "";
+        var side = el("div"), pick = el("button", "btn ghost", "Choose photo"), rm = el("button", "link", "Remove"), note = el("div", "hint");
+        pick.type = "button"; rm.type = "button"; rm.style.marginLeft = "12px";
+        var fi = el("input"); fi.type = "file"; fi.accept = "image/png,image/jpeg"; fi.hidden = true;
+        function show(src) { pv.innerHTML = ""; if (src) { var im = new Image(); im.src = planData[src] || src; pv.appendChild(im); } else pv.textContent = "No photo"; rm.hidden = !hid.value; }
+        show(hid.value);
+        pick.addEventListener("click", function () { fi.click(); });
+        rm.addEventListener("click", function () { hid.value = ""; show(""); });
+        fi.addEventListener("change", function () {
+          var file = fi.files[0]; fi.value = ""; if (!file) return;
+          tpUploads++; note.textContent = "Uploading…"; $("b-save-tp").disabled = true;
+          shrink(file).then(function (out) {
+            return api("upload", { file: { name: file.name, mime: out.mime, data: out.dataUrl, folder: "tenant" } }).then(function (j) {
+              hid.value = j.url; planData[j.url] = out.dataUrl; show(j.url); note.textContent = "Uploaded ✓ Remember to Save.";
+            });
+          }).catch(function (err) { note.textContent = ""; toast(err.message, true); })
+            .then(function () { tpUploads--; $("b-save-tp").disabled = tpUploads > 0; });
+        });
+        side.appendChild(pick); side.appendChild(rm); side.appendChild(note); side.appendChild(el("div", "hint", "Landscape photos look best (shown at 16:9)."));
+        ir.appendChild(pv); ir.appendChild(side); ir.appendChild(fi); wrap.appendChild(ir); wrap.appendChild(hid);
+      } else {
+        wrap = el("label", "f"); wrap.appendChild(el("span", null, f.l + (f.req ? " *" : "")));
+        var inp;
+        if (f.t === "long") { inp = el("textarea"); inp.rows = 4; }
+        else if (f.t === "choice") { inp = el("select"); f.opts.forEach(function (o) { inp.appendChild(new Option(o[1], o[0])); }); }
+        else if (f.t === "days") { inp = daysInput(val || ""); }
+        else if (f.t === "link") { inp = linkInput(f.k, val || ""); }
+        else { inp = el("input"); inp.type = f.t === "date" ? "date" : f.t === "time" ? "time" : f.t === "email" ? "email" : "text"; }
+        if (f.t !== "days" && f.t !== "link") {
+          inp.dataset.k = f.k; inp.value = val || ""; if (f.max) inp.maxLength = f.max; if (f.ph) inp.placeholder = f.ph;
+          if (f.t === "time") inp.step = 300;
+          if (f.list) { var dl = el("datalist"); dl.id = "dl-" + f.k; f.list.forEach(function (x) { dl.appendChild(new Option(x, x)); }); wrap.appendChild(dl); inp.setAttribute("list", dl.id); }
+        }
+        wrap.appendChild(inp);
+        if (f.hint) wrap.appendChild(el("div", "hint", f.hint));
+      }
+      if (f.half) { if (!row) { row = el("div", "two"); box.appendChild(row); } row.appendChild(wrap); if (row.children.length === 2) row = null; }
+      else { row = null; box.appendChild(wrap); }
+    });
+    $("e-tp").hidden = true; open("dlg-tp");
+  }
+  function linkInput(k, val) {
+    var w = el("div", "linkrow"), inp = el("input"); inp.type = "text"; inp.dataset.k = k; inp.value = val; inp.placeholder = "https://…  (or upload a PDF)";
+    var up = el("button", "btn ghost", "Upload PDF"); up.type = "button";
+    var fi = el("input"); fi.type = "file"; fi.accept = "application/pdf,image/png,image/jpeg"; fi.hidden = true;
+    up.addEventListener("click", function () { fi.click(); });
+    fi.addEventListener("change", function () {
+      var file = fi.files[0]; fi.value = ""; if (!file) return;
+      if (!/^(application\/pdf|image\/(png|jpeg))$/.test(file.type)) { toast("Please choose a PDF, PNG or JPG.", true); return; }
+      if (file.size > 5 * 1048576) { toast("That file is over 5 MB.", true); return; }
+      tpUploads++; $("b-save-tp").disabled = true; up.disabled = true; up.textContent = "Uploading…";
+      var rd = new FileReader();
+      rd.onload = function () {
+        api("upload", { file: { name: file.name, mime: file.type, data: rd.result, folder: "tenant" } })
+          .then(function (j) { inp.value = j.url; toast("Uploaded. It can be opened in about a minute. Remember to Save."); })
+          .catch(function (err) { toast(err.message, true); })
+          .then(function () { tpUploads--; $("b-save-tp").disabled = tpUploads > 0; up.disabled = false; up.textContent = "Upload PDF"; });
+      };
+      rd.readAsDataURL(file);
+    });
+    w.appendChild(inp); w.appendChild(up); w.appendChild(fi);
+    return w;
+  }
+  function daysInput(val) {
+    var w = el("div", "days"), on = String(val).split(",").filter(Boolean);
+    w.dataset.k = "repeatDays"; w.dataset.t = "days";
+    [1, 2, 3, 4, 5, 6, 0].forEach(function (d) {
+      var lb = el("label"), c = el("input"); c.type = "checkbox"; c.value = d; c.checked = on.indexOf(String(d)) !== -1;
+      lb.classList.toggle("on", c.checked);
+      c.addEventListener("change", function () { lb.classList.toggle("on", c.checked); });
+      lb.appendChild(c); lb.appendChild(document.createTextNode(DOW[d])); w.appendChild(lb);
+    });
+    var wk = el("button", "link", "Weekdays"); wk.type = "button"; wk.style.marginLeft = "6px";
+    wk.addEventListener("click", function () { w.querySelectorAll("input").forEach(function (c) { c.checked = ["1", "2", "3", "4", "5"].indexOf(c.value) !== -1; c.parentNode.classList.toggle("on", c.checked); }); });
+    var clr = el("button", "link", "Clear"); clr.type = "button"; clr.style.marginLeft = "10px";
+    clr.addEventListener("click", function () { w.querySelectorAll("input").forEach(function (c) { c.checked = false; c.parentNode.classList.remove("on"); }); });
+    w.appendChild(wk); w.appendChild(clr);
+    return w;
+  }
+  $("f-tp").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (tpUploads > 0) { $("e-tp").textContent = "Wait for the upload to finish."; $("e-tp").hidden = false; return; }
+    var item = { id: tpEditing.id }, box = $("tp-fields");
+    box.querySelectorAll("[data-k]").forEach(function (x) {
+      if (x.dataset.t === "days") item[x.dataset.k] = Array.prototype.filter.call(x.querySelectorAll("input"), function (c) { return c.checked; }).map(function (c) { return c.value; }).join(",");
+      else if (x.dataset.t === "yesno") item[x.dataset.k] = x.checked;
+      else item[x.dataset.k] = x.value;
+    });
+    var b = $("b-save-tp"); $("e-tp").hidden = true; busy(b, true, "Saving…");
+    var key = tpEditing.key;
+    api("tpSave", { list: key, item: item }).then(function (j) {
+      state.tenant[key] = j.list; state.status = j.status; renderTenant(); renderStatus(); close("dlg-tp");
+      toast("Saved. Click Publish when you're ready for it to go live.");
+    }).catch(function (err) { $("e-tp").textContent = err.message; $("e-tp").hidden = false; })
+      .then(function () { busy(b, false); });
+  });
+
   /* ---------- tabs + history ---------- */
   document.querySelectorAll("[data-tab]").forEach(function (t) {
     t.addEventListener("click", function () {
       document.querySelectorAll("[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", x === t); });
-      ["availability", "buildings", "pdfs", "campus", "history"].forEach(function (k) { $("tab-" + k).hidden = t.dataset.tab !== k; });
+      ["availability", "buildings", "pdfs", "campus", "tenant", "history"].forEach(function (k) { $("tab-" + k).hidden = t.dataset.tab !== k; });
       if (t.dataset.tab === "history") loadHistory(); else refresh();
       if (t.dataset.tab === "pdfs") checkFonts();
     });
