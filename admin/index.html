@@ -224,6 +224,14 @@
   .drop.over { background: #f3ede2; }
   .drop .pv { width: 96px; height: 70px; flex: none; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; overflow: hidden; background: var(--cream); font-size: 11px; color: var(--muted); text-align: center; }
   .drop .pv img { max-width: 100%; max-height: 100%; }
+  /* campus photo crop: same 3:2 frame as the website */
+  .crop { margin-top: 12px; }
+  .crop-frame { position: relative; aspect-ratio: 3 / 2; max-width: 420px; overflow: hidden; background: #475143;
+    border: 1px solid var(--line); cursor: grab; touch-action: none; user-select: none; }
+  .crop-frame.dragging { cursor: grabbing; }
+  .crop-frame img { position: absolute; pointer-events: none; -webkit-user-drag: none; }
+  .crop-tools { display: flex; align-items: center; gap: 10px; max-width: 420px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+  .crop-tools input[type=range] { flex: 1; accent-color: var(--gold); }
   .drop .txt { font-size: 14px; }
   .switch { display: flex; align-items: center; gap: 10px; cursor: pointer; margin: 4px 0 18px; }
   .switch input { width: 18px; height: 18px; accent-color: var(--gold-dark); }
@@ -503,11 +511,17 @@
         <label for="cm-file" class="flab">Photo</label>
         <div class="drop" id="cm-drop" tabindex="0">
           <div class="pv" id="cm-pv">None</div>
-          <div class="txt"><b>Drop a photo here</b>, or click to choose.<div class="hint">Landscape photos look best (shown at 3:2). Big photos are shrunk automatically.</div>
+          <div class="txt"><b>Drop a photo here</b>, or click to choose.<div class="hint">Shown at 3:2 (landscape); set the crop below. Big photos are shrunk automatically.</div>
             <div id="cm-upl" class="hint" hidden></div>
             <button type="button" class="link" id="cm-rm" hidden>Remove photo</button></div>
         </div>
         <input type="file" id="cm-file" accept="image/png,image/jpeg" hidden>
+        <div class="crop" id="cm-crop" hidden>
+          <div class="hint" style="margin-bottom:6px">Crop on the website: <b>drag the photo</b> to move it, use the slider to zoom.</div>
+          <div class="crop-frame" id="cm-frame"><img id="cm-cimg" alt="Crop preview"></div>
+          <div class="crop-tools"><span>Zoom</span><input type="range" id="cm-zoom" min="1" max="3" step="0.01" value="1" aria-label="Zoom">
+            <button type="button" class="link" id="cm-creset">Reset</button></div>
+        </div>
       </div>
       <label class="switch" id="cm-show-wrap" style="margin-top:14px"><input type="checkbox" id="cm-show"> Show on the map</label>
       <label class="switch" id="cm-click-wrap"><input type="checkbox" id="cm-click"> Clickable (opens the photo + text)</label>
@@ -820,7 +834,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   var $ = function (id) { return document.getElementById(id); };
   var state = { token: null, me: null, suites: [], buildings: [], status: {}, editing: null, publicBase: "", types: [], contacts: [] };
   var READY = "Reserve Ready Suite", CAMPUS = "Campus Availability";
-  var BACKEND_VERSION = "8";   // must match CONFIG.VERSION in Code.gs
+  var BACKEND_VERSION = "9";   // must match CONFIG.VERSION in Code.gs
   function PUBLIC_BASE() { return state.publicBase || "https://thereservebellevue.github.io/web/"; }
   var SKEY = "reserve-editor-session";
 
@@ -904,8 +918,10 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
     var f = $("filter-b"), keep = f.value; f.length = 1;
     state.buildings.forEach(function (b) { f.appendChild(new Option(pad(b.number) + " " + b.name, b.number)); });
     f.value = keep;
-    var s = $("s-building"); s.length = 0; s.appendChild(new Option("Choose a building…", ""));
+    // keep the edit window's building if a background refresh lands while it's open
+    var s = $("s-building"), keepS = s.value; s.length = 0; s.appendChild(new Option("Choose a building…", ""));
     state.buildings.forEach(function (b) { s.appendChild(new Option(pad(b.number) + " " + b.name, b.number)); });
+    s.value = keepS;
   }
   $("filter-b").addEventListener("change", renderRows);
   $("filter-t").addEventListener("change", renderRows);
@@ -1434,7 +1450,53 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   });
 
   /* ---------- campus map (photos + text for the Campus page) ---------- */
-  var cmEditing = null, cmImage = "", cmUploading = false;
+  var cmEditing = null, cmImage = "", cmUploading = false, cmCrop = null;
+  // Photo crop is saved on the end of the image link, like  photo.jpg#crop=0.5,0.3,1.4  (center x, center y, zoom).
+  // The website reads it with the same math (applyCrop), so the editor preview matches exactly.
+  var CROP_ASPECT = 3 / 2;
+  function imgBase(u) { return String(u || "").split("#")[0]; }
+  function parseCrop(u) { var m = /#crop=([\d.]+),([\d.]+),([\d.]+)/.exec(u || ""); return m ? { x: +m[1], y: +m[2], z: +m[3] } : null; }
+  function cropFrag(c) { return c && (c.z > 1.001 || Math.abs(c.x - .5) > .001 || Math.abs(c.y - .5) > .001) ? "#crop=" + c.x.toFixed(3) + "," + c.y.toFixed(3) + "," + c.z.toFixed(2) : ""; }
+  function applyCrop(img, c, fa) {
+    var iw = img.naturalWidth, ih = img.naturalHeight; if (!iw || !ih) return c;
+    var ia = iw / ih, w, h;
+    if (ia > fa) { h = 100; w = ia / fa * 100; } else { w = 100; h = fa / ia * 100; }
+    w *= c.z; h *= c.z;
+    var l = Math.min(0, Math.max(100 - w, 50 - c.x * w)), t = Math.min(0, Math.max(100 - h, 50 - c.y * h));
+    img.style.cssText = "position:absolute;max-width:none;max-height:none;object-fit:fill;width:" + w + "%;height:" + h + "%;left:" + l + "%;top:" + t + "%";
+    return { x: (50 - l) / w, y: (50 - t) / h, z: c.z };      // the crop after keeping the frame filled
+  }
+  // Reusable crop box (Tenant Portal photos): frame at the website's shape, drag to move, slider to zoom.
+  // onChange gets the "#crop=..." ending for the photo link ("" when centered with no zoom).
+  function makeCropper(aspect, onChange) {
+    var box = el("div", "crop"); box.hidden = true;
+    box.appendChild(el("div", "hint", "Crop on the website: drag the photo to move it, use the slider to zoom."));
+    var frame = el("div", "crop-frame"), img = el("img"); img.alt = "Crop preview"; frame.style.aspectRatio = String(aspect); frame.appendChild(img); box.appendChild(frame);
+    var tools = el("div", "crop-tools"); tools.appendChild(el("span", null, "Zoom"));
+    var zoom = el("input"); zoom.type = "range"; zoom.min = 1; zoom.max = 3; zoom.step = 0.01; zoom.value = 1; zoom.setAttribute("aria-label", "Zoom"); tools.appendChild(zoom);
+    var reset = el("button", "link", "Reset"); reset.type = "button"; tools.appendChild(reset); box.appendChild(tools);
+    var crop = { x: .5, y: .5, z: 1 }, drag = null;
+    function draw() { crop = applyCrop(img, crop, aspect); zoom.value = crop.z; onChange(cropFrag(crop)); }
+    img.onload = function () { if (!box.hidden) draw(); };
+    frame.addEventListener("pointerdown", function (e) {
+      if (!img.naturalWidth) return;
+      drag = { px: e.clientX, py: e.clientY, x: crop.x, y: crop.y, w: img.offsetWidth, h: img.offsetHeight };
+      frame.setPointerCapture(e.pointerId); frame.classList.add("dragging");
+    });
+    frame.addEventListener("pointermove", function (e) {
+      if (!drag) return;
+      crop = { x: drag.x - (e.clientX - drag.px) / drag.w, y: drag.y - (e.clientY - drag.py) / drag.h, z: crop.z }; draw();
+    });
+    ["pointerup", "pointercancel"].forEach(function (ev) { frame.addEventListener(ev, function () { drag = null; frame.classList.remove("dragging"); }); });
+    zoom.addEventListener("input", function () { crop = { x: crop.x, y: crop.y, z: +zoom.value }; draw(); });
+    reset.addEventListener("click", function () { crop = { x: .5, y: .5, z: 1 }; draw(); });
+    return { el: box, set: function (src, c) {
+      box.hidden = !src; crop = c || { x: .5, y: .5, z: 1 };
+      if (!src) { img.removeAttribute("src"); return; }
+      var want = planData[imgBase(src)] || imgBase(src);
+      if (img.getAttribute("src") !== want) img.src = want; else if (img.complete) draw();
+    } };
+  }
   function cmLabel(c) {
     if (c.key === "intro") return "Intro: " + (c.name || "");
     if (/^b\d+$/.test(c.key)) return bName(Number(c.key.slice(1)));
@@ -1452,9 +1514,9 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
         var tf = el("td", "c-f");
         if (c.image) {
           var th = el("button", "thumb"); th.type = "button"; th.title = "View photo";
-          var im = new Image(); im.alt = ""; im.loading = "lazy"; im.src = planData[c.image] || c.image;
+          var im = new Image(); im.alt = ""; im.loading = "lazy"; im.src = planData[imgBase(c.image)] || c.image;
           im.onerror = function () { th.textContent = "Processing\u2026"; th.title = "New photos appear within about a minute"; };
-          th.appendChild(im); th.addEventListener("click", function () { $("view-img").src = planData[c.image] || c.image; open("dlg-view"); });
+          th.appendChild(im); th.addEventListener("click", function () { $("view-img").src = planData[imgBase(c.image)] || c.image; open("dlg-view"); });
           tf.appendChild(th);
         } else if (c.key !== "roads") { var ph = el("span", "thumb ph", "No photo"); tf.appendChild(ph); }
         tr.appendChild(tf);
@@ -1476,13 +1538,14 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
     });
   }
   function setCmPreview(src, note) {
+    showCrop(src);
     var pv = $("cm-pv"); pv.innerHTML = "";
-    if (src) { var im = new Image(); im.src = planData[src] || src; im.onerror = function () { pv.textContent = "Processing\u2026"; }; pv.appendChild(im); } else pv.textContent = "None";
+    if (src) { var im = new Image(); im.src = planData[imgBase(src)] || src; im.onerror = function () { pv.textContent = "Processing\u2026"; }; pv.appendChild(im); } else pv.textContent = "None";
     $("cm-rm").hidden = !cmImage;
     $("cm-upl").hidden = !note; $("cm-upl").textContent = note || "";
   }
   function editCampus(c) {
-    cmEditing = c; cmImage = c.image || "";
+    cmEditing = c; cmImage = imgBase(c.image); cmCrop = parseCrop(c.image) || { x: .5, y: .5, z: 1 };
     var isB = /^b\d+$/.test(c.key), isIntro = c.key === "intro", isRoads = c.key === "roads";
     $("cm-title").textContent = isIntro ? "Edit intro" : "Edit " + cmLabel(c);
     $("cm-name-wrap").hidden = isB; $("cm-name").value = c.name || "";
@@ -1502,7 +1565,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
     e.preventDefault();
     if (cmUploading) { $("e-campus").textContent = "Wait for the photo to finish uploading."; $("e-campus").hidden = false; return; }
     var b = $("b-save-cm"), c = cmEditing; $("e-campus").hidden = true; busy(b, true, "Saving\u2026");
-    api("saveCampus", { spot: { key: c.key, name: $("cm-name").value, text: $("cm-text").value, image: cmImage, rsf: $("cm-rsf").value,
+    api("saveCampus", { spot: { key: c.key, name: $("cm-name").value, text: $("cm-text").value, image: cmImage ? cmImage + cropFrag(cmCrop) : "", rsf: $("cm-rsf").value,
       show: $("cm-show").checked, clickable: $("cm-click").checked } })
       .then(function (j) { state.campus = j.campus; state.status = j.status; renderCampus(); renderStatus(); close("dlg-campus");
         toast("Saved. Click Publish when you're ready for it to go live."); })
@@ -1517,9 +1580,32 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   cmDrop.addEventListener("drop", function (e) { if (e.dataTransfer.files[0]) cmHandle(e.dataTransfer.files[0]); });
   cmFile.addEventListener("change", function () { if (cmFile.files[0]) cmHandle(cmFile.files[0]); cmFile.value = ""; });
   $("cm-rm").addEventListener("click", function (e) { e.stopPropagation(); cmImage = ""; setCmPreview(""); });
+  // crop frame: drag to move, slider to zoom
+  var cmFrame = $("cm-frame"), cmCimg = $("cm-cimg"), cmDrag = null;
+  function showCrop(src) {
+    $("cm-crop").hidden = !src;
+    if (!src) { cmCimg.removeAttribute("src"); return; }
+    var want = planData[imgBase(src)] || src;
+    cmCimg.onload = function () { drawCrop(); };
+    if (cmCimg.getAttribute("src") !== want) cmCimg.src = want; else drawCrop();
+  }
+  function drawCrop() { if (cmCrop) { cmCrop = applyCrop(cmCimg, cmCrop, CROP_ASPECT); $("cm-zoom").value = cmCrop.z; } }
+  cmFrame.addEventListener("pointerdown", function (e) {
+    if (!cmCimg.naturalWidth) return;
+    cmDrag = { px: e.clientX, py: e.clientY, x: cmCrop.x, y: cmCrop.y, w: cmCimg.offsetWidth, h: cmCimg.offsetHeight };
+    cmFrame.setPointerCapture(e.pointerId); cmFrame.classList.add("dragging");
+  });
+  cmFrame.addEventListener("pointermove", function (e) {
+    if (!cmDrag) return;
+    cmCrop = { x: cmDrag.x - (e.clientX - cmDrag.px) / cmDrag.w, y: cmDrag.y - (e.clientY - cmDrag.py) / cmDrag.h, z: cmCrop.z };
+    drawCrop();
+  });
+  ["pointerup", "pointercancel"].forEach(function (ev) { cmFrame.addEventListener(ev, function () { cmDrag = null; cmFrame.classList.remove("dragging"); }); });
+  $("cm-zoom").addEventListener("input", function () { cmCrop = { x: cmCrop.x, y: cmCrop.y, z: +this.value }; drawCrop(); });
+  $("cm-creset").addEventListener("click", function () { cmCrop = { x: .5, y: .5, z: 1 }; drawCrop(); });
   function cmHandle(f) {
     if (!/^image\/(png|jpeg)$/.test(f.type)) { toast("Please choose a PNG or JPG image.", true); return; }
-    cmUploading = true; $("b-save-cm").disabled = true;
+    cmUploading = true; $("b-save-cm").disabled = true; cmCrop = { x: .5, y: .5, z: 1 };
     setCmPreview(URL.createObjectURL(f), "Preparing\u2026");
     shrink(f).then(function (out) {
       setCmPreview(out.dataUrl, "Uploading " + Math.round(out.bytes / 1024) + " KB\u2026");
@@ -1612,7 +1698,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
       if (key === "amenities" && !it.show) tr.className = "off";
       if (key === "amenities") {
         var tf = el("td", "c-f");
-        if (it.image) { var th = el("span", "thumb"); var im = new Image(); im.src = planData[it.image] || it.image; im.alt = ""; im.onerror = function () { th.textContent = "Processing…"; }; th.appendChild(im); tf.appendChild(th); }
+        if (it.image) { var th = el("span", "thumb"); var im = new Image(); im.src = planData[imgBase(it.image)] || it.image; im.alt = ""; im.onerror = function () { th.textContent = "Processing…"; }; th.appendChild(im); tf.appendChild(th); }
         else tf.appendChild(el("span", "thumb ph", "No photo"));
         tr.appendChild(tf);
       }
@@ -1723,22 +1809,23 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
         var side = el("div"), pick = el("button", "btn ghost", "Choose photo"), rm = el("button", "link", "Remove"), note = el("div", "hint");
         pick.type = "button"; rm.type = "button"; rm.style.marginLeft = "12px";
         var fi = el("input"); fi.type = "file"; fi.accept = "image/png,image/jpeg"; fi.hidden = true;
-        function show(src) { pv.innerHTML = ""; if (src) { var im = new Image(); im.src = planData[src] || src; pv.appendChild(im); } else pv.textContent = "No photo"; rm.hidden = !hid.value; }
+        var cropper = makeCropper(16 / 9, function (frag) { if (hid.value) hid.value = imgBase(hid.value) + frag; });
+        function show(src) { pv.innerHTML = ""; if (src) { var im = new Image(); im.src = planData[imgBase(src)] || src; pv.appendChild(im); } else pv.textContent = "No photo"; rm.hidden = !hid.value; cropper.set(src, parseCrop(src)); }
         show(hid.value);
         pick.addEventListener("click", function () { fi.click(); });
         rm.addEventListener("click", function () { hid.value = ""; show(""); });
         fi.addEventListener("change", function () {
           var file = fi.files[0]; fi.value = ""; if (!file) return;
-          tpUploads++; note.textContent = "Uploading…"; $("b-save-tp").disabled = true;
+          tpUploads++; note.textContent = "Uploading\u2026"; $("b-save-tp").disabled = true;
           shrink(file).then(function (out) {
             return api("upload", { file: { name: file.name, mime: out.mime, data: out.dataUrl, folder: "tenant" } }).then(function (j) {
-              hid.value = j.url; planData[j.url] = out.dataUrl; show(j.url); note.textContent = "Uploaded ✓ Remember to Save.";
+              hid.value = j.url; planData[j.url] = out.dataUrl; show(j.url); note.textContent = "Uploaded \u2713 Remember to Save.";
             });
           }).catch(function (err) { note.textContent = ""; toast(err.message, true); })
             .then(function () { tpUploads--; $("b-save-tp").disabled = tpUploads > 0; });
         });
-        side.appendChild(pick); side.appendChild(rm); side.appendChild(note); side.appendChild(el("div", "hint", "Landscape photos look best (shown at 16:9)."));
-        ir.appendChild(pv); ir.appendChild(side); ir.appendChild(fi); wrap.appendChild(ir); wrap.appendChild(hid);
+        side.appendChild(pick); side.appendChild(rm); side.appendChild(note); side.appendChild(el("div", "hint", "Shown at 16:9 (landscape); set the crop below."));
+        ir.appendChild(pv); ir.appendChild(side); ir.appendChild(fi); wrap.appendChild(ir); wrap.appendChild(cropper.el); wrap.appendChild(hid);
       } else {
         wrap = el("label", "f"); wrap.appendChild(el("span", null, f.l + (f.req ? " *" : "")));
         var inp;
