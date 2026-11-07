@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-07T01:25:37.768Z",
+  "updated": "2026-11-07T01:47:26.847Z",
   "buildings": {
     "1": "Gateway 112",
     "2": "Primrose",
@@ -60,7 +60,7 @@
       "type": "Reserve Ready Suite",
       "ready": true,
       "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/gatewat-210-new-3x-mw5ctklb.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Gateway-112-Suite-210.pdf?v=mw5cxjav",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Gateway-112-Suite-210.pdf?v=mw5qt47u",
       "keyplan": "https://thereservebellevue.github.io/web/assets/floorplans/keyplan-gateway-112-210-small-3x-mw5ctrm8.png",
       "north": "0"
     },
@@ -240,7 +240,7 @@
       "type": "Campus Availability",
       "ready": false,
       "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/cypress-fl1-3x-mw5cur5z.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Cypress-Suite-100.pdf?v=mw5cvo9b",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Cypress-Suite-100.pdf?v=mw5qt9w0",
       "keyplan": "https://thereservebellevue.github.io/web/assets/floorplans/keyplan-cypress1fl-small-3x-mw59wq57.png",
       "north": "48"
     },
@@ -252,7 +252,7 @@
       "type": "Campus Availability",
       "ready": false,
       "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/screenshot-2026-11-06-at-11-11-51-am-mw5cqp19.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Gateway-112-Suite-100.pdf?v=mw5cwb4i",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Gateway-112-Suite-100.pdf?v=mw5qstm7",
       "keyplan": "https://thereservebellevue.github.io/web/assets/floorplans/keyplan-screenshot-2026-11-06-at-11-12-4-mw5cqqn8.png",
       "north": "0"
     },
@@ -264,7 +264,7 @@
       "type": "Campus Availability",
       "ready": false,
       "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/gateway-110-new-3x-mw5crwbp.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Gateway-112-Suite-110.pdf?v=mw5cww2l",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Gateway-112-Suite-110.pdf?v=mw5qsysp",
       "keyplan": "https://thereservebellevue.github.io/web/assets/floorplans/keyplan-gateway-112-small-3x-mw5csupa.png",
       "north": "0"
     },
@@ -276,7 +276,7 @@
       "type": "Campus Availability",
       "ready": false,
       "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/madrona-101-new-3x-mw5buiom.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-101.pdf?v=mw5cyjez",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-101.pdf?v=mw5qter4",
       "keyplan": "https://thereservebellevue.github.io/web/assets/floorplans/keyplan-madrona-101-small-3x-mw59xk53.png",
       "north": "300"
     },
@@ -288,7 +288,7 @@
       "type": "Campus Availability",
       "ready": false,
       "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/madrona-102-3x-mw4x9lzv.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-102.pdf?v=mw5czcl3",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-102.pdf?v=mw5qtjik",
       "keyplan": "https://thereservebellevue.github.io/web/assets/floorplans/keyplan-madrona-102-small-3x-mw4xiehm.png",
       "north": "290"
     },
@@ -300,7 +300,7 @@
       "type": "Campus Availability",
       "ready": false,
       "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/madrona-106-new-3x-mw5d0mf1.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-106.pdf?v=mw5d17ez",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-106.pdf?v=mw5qtoc2",
       "keyplan": "https://thereservebellevue.github.io/web/assets/floorplans/keyplan-madrona-106-small-3x-mw59yzxy.png",
       "north": "271"
     },
@@ -312,7 +312,7 @@
       "type": "Campus Availability",
       "ready": false,
       "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/madrona-200-new-3x-mw5d32k4.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-200.pdf?v=mw5d3gke",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-200.pdf?v=mw5qttjt",
       "keyplan": "https://thereservebellevue.github.io/web/assets/floorplans/keyplan-madrona-200-small-3x-mw5a3fv0.png",
       "north": "310"
     },
@@ -336,7 +336,7 @@
       "type": "Campus Availability",
       "ready": false,
       "floorplan": "https://thereservebellevue.github.io/web/assets/floorplans/madrona-208-210-new-3x-mw5djrsd.png",
-      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-208-210.pdf?v=mw5dl9b0",
+      "pdf": "https://thereservebellevue.github.io/web/assets/pdfs/The-Reserve-Madrona-Suite-208-210.pdf?v=mw5qtz0p",
       "keyplan": "https://thereservebellevue.github.io/web/assets/floorplans/keyplan-madrona-208-210-small-3x-mw5dkbkh.png",
       "north": "320"
     },
