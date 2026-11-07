@@ -57,6 +57,19 @@
   .brand b { font-size: 16px; text-transform: uppercase; letter-spacing: .075em; }
   .who { display: flex; align-items: center; gap: 14px; font-size: 13px; color: #cfc8bc; }
   .who .link { color: var(--cream); }
+  .who .role { font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; font-weight: 700; color: var(--gold); border: 1px solid var(--gold); padding: 2px 7px; }
+  .who .help { color: var(--cream); background: none; border: 1px solid #6d6a63; padding: 6px 12px; cursor: pointer; font-size: 12px;
+    text-transform: uppercase; letter-spacing: .075em; font-weight: 700; }
+  .who .help:hover, .who .help:focus-visible { border-color: var(--gold); color: var(--gold); }
+  /* People tab */
+  .roles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 22px; }
+  .roles div { background: var(--paper); border: 1px solid var(--line); padding: 12px 14px; font-size: 13.5px; }
+  .roles b { display: block; text-transform: uppercase; letter-spacing: .075em; font-size: 12px; color: var(--gold-dark); margin-bottom: 4px; }
+  .pill.owner { color: var(--cream); background: var(--ink); border-color: var(--ink); }
+  .pill.admin { color: var(--gold-dark); border-color: var(--gold); background: #f4ecdc; }
+  .pill.editor { color: var(--ink); border-color: var(--line); }
+  tr.off td:not(:last-child) { opacity: .5; }
+  @media (max-width: 760px) { .roles { grid-template-columns: 1fr; } }
   nav.tabs { background: var(--paper); border-bottom: 1px solid var(--line); }
   nav.tabs .wrap { display: flex; gap: 4px; overflow-x: auto; }
   nav.tabs button { background: none; border: 0; border-bottom: 3px solid transparent; padding: 14px 14px 11px; cursor: pointer;
@@ -245,6 +258,7 @@
 
   @media (max-width: 720px) {
     .who span.email { display: none; }
+    .who .role { display: none; }
     .two { grid-template-columns: 1fr; }
     table.grid, .grid tbody { display: block; }
     .grid thead { display: none; }
@@ -281,6 +295,7 @@
         <button class="btn" type="submit" id="b-send">Email me a code</button>
         <p class="err" id="e-email" hidden></p>
       </form>
+      <p class="hint" style="margin-top:18px">Trouble signing in? <a class="link" id="signin-help" href="#">Email support</a></p>
     </div>
     <div id="step-code" hidden>
       <p class="lead">Enter the code sent to <b id="sent-to"></b>. It expires in 10 minutes.</p>
@@ -302,7 +317,7 @@
   <header class="top">
     <div class="wrap">
       <div class="brand"><small class="caps">The Reserve</small><b>Website Editor</b></div>
-      <div class="who"><span class="email" id="me"></span><button class="link" id="b-signout">Sign out</button></div>
+      <div class="who"><button type="button" class="help" id="b-help">Need help?</button><span class="email" id="me"></span><span class="role" id="me-role"></span><button class="link" id="b-signout">Sign out</button></div>
     </div>
   </header>
   <nav class="tabs" aria-label="Sections">
@@ -312,6 +327,7 @@
       <button role="tab" aria-selected="false" data-tab="pdfs">PDFs</button>
       <button role="tab" aria-selected="false" data-tab="campus">Campus Map</button>
       <button role="tab" aria-selected="false" data-tab="tenant">Tenant Portal</button>
+      <button role="tab" aria-selected="false" data-tab="people" id="tabbtn-people" hidden>People</button>
       <button role="tab" aria-selected="false" data-tab="history">History</button>
     </div>
   </nav>
@@ -375,12 +391,67 @@
         <div id="tp-pane"></div>
       </section>
 
+      <section id="tab-people" hidden>
+        <div class="toolbar"><h2>People <span class="count" id="p-count"></span></h2><button class="btn" id="b-add-person">+ Add person</button></div>
+        <p class="intro">Who can sign in to this editor. Changes take effect right away (no Publish needed). Removing someone or turning off their access signs them out on their next click.</p>
+        <div class="roles">
+          <div><b>Editor</b>Edits everything on the website and publishes.</div>
+          <div><b>Admin</b>Everything an Editor does, plus adds and removes Editors and Admins.</div>
+          <div><b>Owner</b>Everything, plus manages Owners. Gets the <i>Need help?</i> messages.</div>
+        </div>
+        <table class="grid">
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Access</th><th></th></tr></thead>
+          <tbody id="p-rows"><tr><td colspan="5" class="hint">Loading&hellip;</td></tr></tbody>
+        </table>
+      </section>
+
       <section id="tab-history" hidden>
         <div class="toolbar"><h2>History</h2><button class="btn ghost" id="b-refresh-h">Refresh</button></div>
         <ul class="history" id="history"></ul>
       </section>
     </div>
   </main>
+</div>
+
+<!-- person dialog (People tab) -->
+<div class="scrim" id="dlg-person" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="person-title" style="max-width:520px">
+    <h3 id="person-title">Add person</h3>
+    <form id="f-person">
+      <label class="f"><span>Email</span><input type="email" id="p-email" required maxlength="120" placeholder="name@cbre.com"></label>
+      <label class="f"><span>Name</span><input type="text" id="p-name" maxlength="60" placeholder="First Last"></label>
+      <label class="f"><span>Role</span><select id="p-role">
+        <option value="Editor">Editor: edits and publishes</option>
+        <option value="Admin">Admin: also manages people</option>
+        <option value="Owner">Owner: also manages Owners, gets help messages</option></select></label>
+      <label class="switch" id="p-active-wrap"><input type="checkbox" id="p-active" checked> Can sign in</label>
+      <label class="switch" id="p-welcome-wrap"><input type="checkbox" id="p-welcome" checked> Email them a welcome note with the sign-in link</label>
+      <p class="hint" id="p-note" hidden></p>
+      <p class="err" id="e-person" hidden></p>
+      <div class="actions">
+        <button type="button" class="btn ghost" data-close>Cancel</button>
+        <button type="submit" class="btn" id="b-save-person">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Need help? dialog -->
+<div class="scrim" id="dlg-help" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="help-title" style="max-width:560px">
+    <h3 id="help-title">Need help?</h3>
+    <p class="hint" style="margin:-4px 0 16px">Your message goes to the site's Owner, who will reply to <b id="help-me"></b>.</p>
+    <form id="f-help">
+      <label class="f"><span>What's it about?</span><select id="h-topic">
+        <option>Question</option><option>Something isn't working</option><option>Request a change</option></select></label>
+      <label class="f"><span>Message</span><textarea id="h-msg" rows="6" maxlength="4000" required placeholder="What were you doing, and what happened? Suite or page names help."></textarea></label>
+      <p class="err" id="e-help" hidden></p>
+      <div class="actions">
+        <button type="button" class="btn ghost" data-close>Cancel</button>
+        <button type="submit" class="btn" id="b-send-help">Send</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- edit dialog -->
@@ -829,12 +900,15 @@
    SETTINGS — paste the Apps Script web app URL here (ends in /exec)
    ========================================================================= */
 var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhnYGu9wYrCC6tJkuQbdbjbjJoGe7oWKoR0w0E98ZxOWR2A/exec";
+// "Trouble signing in?" on the sign-in screen opens an email to this address (people who can't sign in
+// can't use the in-editor "Need help?" form). Note: this page is public, so this address is visible to anyone.
+var SIGNIN_HELP_EMAIL = "lindsey.huffman@cbre.com";
 
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var state = { token: null, me: null, suites: [], buildings: [], status: {}, editing: null, publicBase: "", types: [], contacts: [] };
   var READY = "Reserve Ready Suite", CAMPUS = "Campus Availability";
-  var BACKEND_VERSION = "9";   // must match CONFIG.VERSION in Code.gs
+  var BACKEND_VERSION = "10";   // must match CONFIG.VERSION in Code.gs
   function PUBLIC_BASE() { return state.publicBase || "https://thereservebellevue.github.io/web/"; }
   var SKEY = "reserve-editor-session";
 
@@ -903,12 +977,13 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
 
   /* ---------- app ---------- */
   function startApp() {
-    $("login").hidden = true; $("app").hidden = false; $("me").textContent = state.me.email;
+    $("login").hidden = true; $("app").hidden = false; showMe();
     refresh();
   }
   function refresh() {
     return api("load").then(function (j) {
       state.suites = j.suites; state.buildings = j.buildings; state.status = j.status; state.publicBase = j.publicBase;
+      if (j.me) { state.me = j.me; var st = stored(); if (st) { st.me = j.me; store(st); } showMe(); }
       state.types = j.types || [CAMPUS, READY]; state.contacts = j.contacts || []; state.campus = j.campus || []; state.tenant = j.tenant || null;
       $("ver-banner").hidden = String(j.version || "") === BACKEND_VERSION;
       fillBuildingSelects(); fillTypeSelects(); renderRows(); renderStatus(); renderBuildings(); renderContacts(); renderCampus(); renderTenant();
@@ -1907,8 +1982,8 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
   document.querySelectorAll("[data-tab]").forEach(function (t) {
     t.addEventListener("click", function () {
       document.querySelectorAll("[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", x === t); });
-      ["availability", "buildings", "pdfs", "campus", "tenant", "history"].forEach(function (k) { $("tab-" + k).hidden = t.dataset.tab !== k; });
-      if (t.dataset.tab === "history") loadHistory(); else refresh();
+      ["availability", "buildings", "pdfs", "campus", "tenant", "people", "history"].forEach(function (k) { $("tab-" + k).hidden = t.dataset.tab !== k; });
+      if (t.dataset.tab === "history") loadHistory(); else if (t.dataset.tab === "people") loadPeople(); else refresh();
       if (t.dataset.tab === "pdfs") checkFonts();
     });
   });
@@ -1927,6 +2002,94 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwnh5iOwiqSPOJurDvDSdHdhn
       });
     }).catch(function (err) { ul.innerHTML = ""; toast(err.message, true); });
   }
+
+  /* ---------- who's signed in + role ---------- */
+  var LEVEL = { Editor: 1, Admin: 2, Owner: 3 };
+  function myLevel() { return LEVEL[(state.me && state.me.role) || "Editor"] || 1; }
+  function showMe() {
+    $("me").textContent = state.me.email;
+    $("me-role").textContent = state.me.role || "Editor";
+    var canPeople = myLevel() >= 2;
+    $("tabbtn-people").hidden = !canPeople;
+    if (!canPeople && !$("tab-people").hidden) document.querySelector('[data-tab="availability"]').click();
+  }
+
+  /* ---------- People tab (Admins + Owners) ---------- */
+  var people = [], editingPerson = null;
+  function loadPeople() {
+    api("users").then(function (j) { people = j.users; renderPeople(); })
+      .catch(function (err) { $("p-rows").innerHTML = ""; toast(err.message, true); });
+  }
+  function renderPeople() {
+    var tb = $("p-rows"); tb.innerHTML = "";
+    var order = { Owner: 0, Admin: 1, Editor: 2 };
+    people.slice().sort(function (a, b) { return (order[a.role] - order[b.role]) || (a.name || a.email).localeCompare(b.name || b.email); }).forEach(function (u) {
+      var tr = el("tr", u.active ? "" : "off"), mine = u.email === state.me.email;
+      tr.appendChild(el("td", null, (u.name || "\u2014") + (mine ? " (you)" : "")));
+      tr.appendChild(el("td", null, u.email));
+      var rt = el("td"); rt.appendChild(el("span", "pill " + u.role.toLowerCase(), u.role)); tr.appendChild(rt);
+      var at = el("td"); at.appendChild(el("span", "pill " + (u.active ? "on" : "offp"), u.active ? "On" : "Off")); tr.appendChild(at);
+      var act = el("td"); act.style.textAlign = "right"; act.style.whiteSpace = "nowrap";
+      var locked = u.role === "Owner" && myLevel() < 3;          // Admins can't change Owners
+      if (!locked) {
+        var eb = el("button", "link", "Edit"); eb.type = "button"; eb.addEventListener("click", function () { editPerson(u); }); act.appendChild(eb);
+        if (!mine) {
+          var rb = el("button", "link", "Remove"); rb.type = "button"; rb.style.marginLeft = "14px";
+          rb.addEventListener("click", function () { removePerson(u); }); act.appendChild(rb);
+        }
+      } else act.appendChild(el("span", "hint", "Owner"));
+      tr.appendChild(act); tb.appendChild(tr);
+    });
+    $("p-count").textContent = "(" + people.length + ")";
+  }
+  function editPerson(u) {
+    editingPerson = u || null;
+    var isNew = !u, mine = u && u.email === state.me.email;
+    $("person-title").textContent = isNew ? "Add person" : "Edit " + (u.name || u.email);
+    $("p-email").value = isNew ? "" : u.email; $("p-email").readOnly = !isNew;
+    $("p-name").value = isNew ? "" : u.name;
+    $("p-role").value = isNew ? "Editor" : u.role;
+    $("p-role").querySelector('option[value="Owner"]').disabled = myLevel() < 3;
+    $("p-role").disabled = !!mine; $("p-active").checked = isNew ? true : u.active; $("p-active").disabled = !!mine;
+    $("p-welcome-wrap").hidden = !isNew; $("p-welcome").checked = true;
+    $("p-note").hidden = !(mine || isNew);
+    $("p-note").textContent = mine ? "You can change your name here. Another Admin or Owner has to change your role or access."
+      : "To change someone's email address, remove them and add the new address.";
+    $("e-person").hidden = true;
+    open("dlg-person");
+    (isNew ? $("p-email") : $("p-name")).focus();
+  }
+  $("b-add-person").addEventListener("click", function () { editPerson(null); });
+  $("f-person").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var isNew = !editingPerson, b = $("b-save-person"); $("e-person").hidden = true; busy(b, true, "Saving\u2026");
+    var p = { email: $("p-email").value.trim(), name: $("p-name").value.trim(), role: $("p-role").value, active: $("p-active").checked, welcome: isNew && $("p-welcome").checked };
+    api("saveUser", { person: p, isNew: isNew }).then(function (j) {
+      people = j.users; renderPeople(); close("dlg-person");
+      toast(isNew ? (j.emailed ? "Added. Welcome email sent to " + p.email + "." : "Added " + p.email + ".") : "Saved.");
+    }).catch(function (err) { $("e-person").textContent = err.message; $("e-person").hidden = false; })
+      .then(function () { busy(b, false); });
+  });
+  function removePerson(u) {
+    if (!confirm("Remove " + (u.name || u.email) + "? They won't be able to sign in. (To pause access instead, use Edit and untick \u201cCan sign in\u201d.)")) return;
+    api("deleteUser", { email: u.email }).then(function (j) { people = j.users; renderPeople(); toast("Removed " + u.email + "."); })
+      .catch(function (err) { toast(err.message, true); });
+  }
+
+  /* ---------- Need help? (emails the Owner) ---------- */
+  $("b-help").addEventListener("click", function () {
+    $("help-me").textContent = state.me.email; $("e-help").hidden = true; open("dlg-help"); $("h-msg").focus();
+  });
+  $("f-help").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var b = $("b-send-help"), tab = document.querySelector('[data-tab][aria-selected="true"]');
+    $("e-help").hidden = true; busy(b, true, "Sending\u2026");
+    api("support", { topic: $("h-topic").value, message: $("h-msg").value, page: tab ? tab.textContent : "", browser: navigator.userAgent })
+      .then(function () { close("dlg-help"); $("h-msg").value = ""; toast("Sent. You'll get a reply by email."); })
+      .catch(function (err) { $("e-help").textContent = err.message; $("e-help").hidden = false; })
+      .then(function () { busy(b, false); });
+  });
+  $("signin-help").href = "mailto:" + SIGNIN_HELP_EMAIL + "?subject=" + encodeURIComponent("Trouble signing in to the website editor");
 
   /* ---------- start ---------- */
   var s = stored();
