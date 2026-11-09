@@ -364,7 +364,7 @@
       </section>
 
       <section id="tab-pdfs" hidden>
-        <div class="toolbar"><h2>Floorplan PDFs</h2><button class="btn ghost" id="b-make-all">Remake all PDFs</button></div>
+        <div class="toolbar"><h2>Floorplan PDFs</h2><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="b-all-pdf">Download all floorplans</button><button class="btn ghost" id="b-make-all">Remake all PDFs</button></div></div>
         <p class="intro">Every suite with a floorplan gets a branded one-page PDF (11 × 8.5 in) for the website's <b>Download PDF</b> link. It's made automatically when you save a suite. After you change contacts, building names or addresses, click <b>Remake all PDFs</b>, then <b>Publish</b>.</p>
         <div class="fontwarn" id="fontwarn" hidden></div>
         <div class="prog" id="prog" hidden><div id="prog-t"></div><div class="bar"><i id="prog-bar"></i></div></div>
@@ -433,6 +433,25 @@
         <button type="submit" class="btn" id="b-save-person">Save</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Download all floorplans (one PDF) -->
+<div class="scrim" id="dlg-allpdf" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="allpdf-title" style="max-width:540px">
+    <h3 id="allpdf-title">Download all floorplans</h3>
+    <p class="hint" style="margin:-4px 0 16px">One PDF with a page per suite, in building and suite order, made from the current info in the editor.</p>
+    <label class="f"><span>Suites</span><select id="ap-type">
+      <option value="">All suites</option></select></label>
+    <label class="f"><span>Building</span><select id="ap-bldg"><option value="">All buildings</option></select></label>
+    <label class="switch"><input type="checkbox" id="ap-hidden"> Include suites hidden from the website</label>
+    <p class="hint" id="ap-count" style="margin-top:12px"></p>
+    <div class="prog" id="ap-prog" hidden><div id="ap-prog-t"></div><div class="bar"><i id="ap-prog-bar"></i></div></div>
+    <p class="err" id="e-allpdf" hidden></p>
+    <div class="actions">
+      <button type="button" class="btn ghost" data-close id="ap-cancel">Cancel</button>
+      <button type="button" class="btn" id="b-ap-go">Download PDF</button>
+    </div>
   </div>
 </div>
 
@@ -1483,6 +1502,64 @@ var SIGNIN_HELP_EMAIL = "lindsey.huffman@cbre.com";
       $("prog-t").textContent = "Making " + (i + 1) + " of " + list.length + ": " + bName(s.building) + ", Suite " + s.suite + "…";
       makePdf(s).catch(function (err) { failed.push(bName(s.building) + " " + s.suite + " (" + err.message + ")"); })
         .then(function () { i++; next(); });
+    })();
+  });
+
+  /* ---------- Download all floorplans as one PDF (made in the browser, nothing is uploaded) ---------- */
+  var apStop = false;
+  function apList() {
+    var t = $("ap-type").value, b = $("ap-bldg").value, hid = $("ap-hidden").checked;
+    var pick = state.suites.filter(function (s) {
+      return (!t || s.type === t) && (!b || String(s.building) === b) && (hid || s.show);
+    });
+    return { pick: pick, use: pick.filter(function (s) { return s.floorplan; }).sort(function (a, c) {
+      return (a.building - c.building) || String(a.suite).localeCompare(String(c.suite), "en", { numeric: true }); }) };
+  }
+  function apCount() {
+    var l = apList(), skip = l.pick.length - l.use.length;
+    $("ap-count").textContent = l.use.length ? l.use.length + " page" + (l.use.length === 1 ? "" : "s") +
+      (skip ? ". " + skip + " suite" + (skip === 1 ? " has" : "s have") + " no floorplan yet and will be left out." : ".")
+      : "No suites with floorplans match.";
+    $("b-ap-go").disabled = !l.use.length;
+  }
+  $("b-all-pdf").addEventListener("click", function () {
+    var t = $("ap-type"), b = $("ap-bldg"), tv = t.value, bv = b.value;
+    t.length = 1; (state.types || []).forEach(function (x) { t.appendChild(new Option(x + " only", x)); }); t.value = tv;
+    b.length = 1; state.buildings.forEach(function (x) { b.appendChild(new Option(pad(x.number) + " " + x.name, x.number)); }); b.value = bv;
+    $("ap-prog").hidden = true; $("e-allpdf").hidden = true; apCount(); open("dlg-allpdf");
+  });
+  ["ap-type", "ap-bldg", "ap-hidden"].forEach(function (id) { $(id).addEventListener("change", apCount); });
+  $("ap-cancel").addEventListener("click", function () { apStop = true; });
+  $("b-ap-go").addEventListener("click", function () {
+    var J = window.jspdf && window.jspdf.jsPDF;
+    if (!J || !window.ReservePDF) { $("e-allpdf").textContent = "The PDF maker didn't load. Refresh the page."; $("e-allpdf").hidden = false; return; }
+    var list = apList().use, b = $("b-ap-go"), doc = new J({ orientation: "landscape", unit: "pt", format: "letter" });
+    var failed = [], pages = 0, i = 0; apStop = false;
+    busy(b, true, "Making\u2026"); $("ap-prog").hidden = false; $("e-allpdf").hidden = true;
+    (function next() {
+      $("ap-prog-bar").style.width = (i / list.length * 100) + "%";
+      if (apStop) { busy(b, false); $("ap-prog").hidden = true; return; }
+      if (i >= list.length) {
+        busy(b, false);
+        if (!pages) { $("e-allpdf").textContent = "No pages could be made: " + failed.join("; "); $("e-allpdf").hidden = false; return; }
+        var t = $("ap-type").value, bv = $("ap-bldg").value;
+        var name = "The-Reserve-Floorplans" + (bv ? "-Building-" + pad(+bv) : "") + (t === READY ? "-Reserve-Ready" : t === CAMPUS ? "-Campus" : "") +
+                   "-" + new Date().toISOString().slice(0, 10) + ".pdf";
+        doc.save(name);
+        $("ap-prog-t").textContent = "Done: " + pages + " page" + (pages === 1 ? "" : "s") + "." + (failed.length ? " Left out: " + failed.join("; ") : "");
+        toast(failed.length ? failed.length + " suite(s) couldn't be added. See the list in the window." : "Downloaded " + name, failed.length > 0);
+        if (!failed.length) setTimeout(function () { close("dlg-allpdf"); }, 900);
+        return;
+      }
+      var s = list[i];
+      $("ap-prog-t").textContent = "Adding " + (i + 1) + " of " + list.length + ": " + bName(s.building) + ", Suite " + s.suite + "\u2026";
+      renderPdf(s).then(function (r) {
+        if (pages) doc.addPage("letter", "landscape");
+        doc.addImage(r.canvas.toDataURL("image/jpeg", 0.9), "JPEG", 0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight(), undefined, "FAST");
+        pages++;
+        try { doc.outline.add(null, bName(s.building) + ", Suite " + s.suite, { pageNumber: pages }); } catch (e) {}   // sidebar bookmarks
+      }).catch(function (err) { failed.push(bName(s.building) + " " + s.suite + " (" + err.message + ")"); })
+        .then(function () { i++; setTimeout(next, 0); });
     })();
   });
 
