@@ -927,7 +927,7 @@ var SIGNIN_HELP_EMAIL = "lindsey.huffman@cbre.com";
   var $ = function (id) { return document.getElementById(id); };
   var state = { token: null, me: null, suites: [], buildings: [], status: {}, editing: null, publicBase: "", types: [], contacts: [] };
   var READY = "Reserve Ready Suite", CAMPUS = "Campus Availability";
-  var BACKEND_VERSION = "10";   // must match CONFIG.VERSION in Code.gs
+  var BACKEND_VERSION = "11";   // must match CONFIG.VERSION in Code.gs
   function PUBLIC_BASE() { return state.publicBase || "https://thereservebellevue.github.io/web/"; }
   var SKEY = "reserve-editor-session";
 
@@ -1802,7 +1802,7 @@ var SIGNIN_HELP_EMAIL = "lindsey.huffman@cbre.com";
       { k: "name", l: "Name", t: "text", max: 60, req: 1 }, { k: "role", l: "Role / what to contact them about", t: "text", max: 80 },
       { k: "phone", l: "Phone", t: "text", max: 30, half: 1 }, { k: "email", l: "Email", t: "email", half: 1 }, { k: "address", l: "Address", t: "text", max: 120 }] }
   };
-  var TP_TABS = [["settings", "Intro + Connect"], ["announcements"], ["events"], ["amenities"], ["documents"], ["contacts"]];
+  var TP_TABS = [["settings", "Intro + Connect"], ["announcements"], ["events"], ["amenities"], ["documents"], ["contacts"], ["effect", "Seasonal effect"]];
   var tpView = "events", tpEditing = null, tpList = null, tpShowPast = false;
   var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   function todayStr() { var t = new Date(); return t.getFullYear() + "-" + ("0" + (t.getMonth() + 1)).slice(-2) + "-" + ("0" + t.getDate()).slice(-2); }
@@ -1820,12 +1820,13 @@ var SIGNIN_HELP_EMAIL = "lindsey.huffman@cbre.com";
     TP_TABS.forEach(function (t) {
       var key = t[0], b = el("button"); b.type = "button"; b.setAttribute("aria-pressed", key === tpView);
       b.appendChild(document.createTextNode(t[1] || TP_DEF[key].label));
-      if (key !== "settings") b.appendChild(el("span", "n", " (" + (state.tenant[key] || []).length + ")"));
+      if (key !== "settings" && key !== "effect") b.appendChild(el("span", "n", " (" + (state.tenant[key] || []).length + ")"));
       b.addEventListener("click", function () { tpView = key; renderTenant(); });
       sub.appendChild(b);
     });
     var pane = $("tp-pane"); pane.innerHTML = "";
     if (tpView === "settings") return renderTpSettings(pane);
+    if (tpView === "effect") return renderTpEffect(pane);
     var def = TP_DEF[tpView], list = (state.tenant[tpView] || []).slice(), key = tpView, now = todayStr();
     var bar = el("div", "toolbar");
     var add = el("button", "btn", "+ Add " + def.one); add.type = "button"; add.addEventListener("click", function () { editTp(key, null); });
@@ -1927,6 +1928,56 @@ var SIGNIN_HELP_EMAIL = "lindsey.huffman@cbre.com";
       api("tpSettings", { intro: { title: v("tps-title"), text: v("tps-text") },
         connect: { title: v("tps-ctitle"), text: v("tps-ctext"), hashtag: v("tps-hash"), email: v("tps-email"), instagram: v("tps-ig"), facebook: v("tps-fb") } })
         .then(function (j) { t.intro = j.intro; t.connect = j.connect; state.status = j.status; renderStatus(); toast("Saved. Publish to update the website."); })
+        .catch(function (err) { toast(err.message, true); }).then(function () { busy(sv, false); });
+    });
+    pane.appendChild(f);
+  }
+
+  // seasonal effect (snow / petals / fog / leaves over the Tenant Portal page)
+  var SEASON_NAME = { winter: "Winter: snow", spring: "Spring: petals + blossoms", summer: "Summer: fog", autumn: "Autumn: falling leaves" };
+  var SEASON_BY_MONTH = [null, "winter", "winter", "spring", "spring", "spring", "summer", "summer", "summer", "autumn", "autumn", "autumn", "winter"];
+  function bellevueToday() {
+    try { var s = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s; } catch (e) {}
+    return todayStr();
+  }
+  function seasonShowing(e) {
+    var today = bellevueToday();
+    if (!e.on) return "Off: nothing shows";
+    if (e.override && (!e.overrideUntil || today <= e.overrideUntil)) return SEASON_NAME[e.override] + " (chosen" + (e.overrideUntil ? ", until " + niceDate(e.overrideUntil) : "") + ")";
+    return SEASON_NAME[SEASON_BY_MONTH[+today.slice(5, 7)]] + " (automatic)";
+  }
+  function renderTpEffect(pane) {
+    var e = state.tenant.effect || { on: true, introSeconds: 3, override: "", overrideUntil: "" }, f = el("form", "tp-form");
+    f.appendChild(el("p", "intro", "Snow, petals, fog or leaves fill the Tenant Portal for a few seconds when it opens (people can push them around with the mouse or a finger), then settle at the bottom of the screen. It follows the seasons in Bellevue automatically, or you can pick a season for a while."));
+    var now = el("p", "hint"); now.style.margin = "0 0 18px"; f.appendChild(now);
+    var onL = el("label", "switch"), on = el("input"); on.type = "checkbox"; on.checked = e.on !== false; on.id = "fx-on";
+    onL.appendChild(on); onL.appendChild(document.createTextNode(" Show the seasonal effect on the Tenant Portal")); f.appendChild(onL);
+    var secL = el("label", "f"); secL.appendChild(el("span", null, "How long it fills the screen before settling (seconds)"));
+    var sec = el("input"); sec.type = "number"; sec.min = 0; sec.max = 20; sec.step = 0.5; sec.value = e.introSeconds; sec.id = "fx-sec"; sec.style.maxWidth = "140px";
+    secL.appendChild(sec); f.appendChild(secL);
+    var seaL = el("label", "f"); seaL.appendChild(el("span", null, "Season"));
+    var sea = el("select"); sea.id = "fx-season";
+    sea.appendChild(new Option("Automatic (follows the calendar)", ""));
+    ["winter", "spring", "summer", "autumn"].forEach(function (k) { sea.appendChild(new Option(SEASON_NAME[k], k)); });
+    sea.value = e.override || ""; seaL.appendChild(sea); f.appendChild(seaL);
+    f.appendChild(el("p", "hint", "Automatic: Dec\u2013Feb snow \u00b7 Mar\u2013May petals \u00b7 Jun\u2013Aug fog \u00b7 Sep\u2013Nov leaves (Bellevue dates)."));
+    var untL = el("div"); untL.style.marginTop = "14px";
+    var ul = el("label", "f"); ul.appendChild(el("span", null, "Show this season until (optional)"));
+    var unt = el("input"); unt.type = "date"; unt.value = e.overrideUntil || ""; unt.id = "fx-until"; unt.style.maxWidth = "220px";
+    ul.appendChild(unt); untL.appendChild(ul);
+    untL.appendChild(el("p", "hint", "After this date it goes back to automatic. Leave blank to keep it until you change it."));
+    f.appendChild(untL);
+    function sync() {
+      untL.hidden = !sea.value; sec.disabled = sea.disabled = unt.disabled = !on.checked;
+      now.textContent = "Visitors will see today: " + seasonShowing({ on: on.checked, override: sea.value, overrideUntil: sea.value ? unt.value : "" }) + " (once saved and published)";
+    }
+    [on, sea, unt].forEach(function (x) { x.addEventListener("change", sync); }); sync();
+    var act = el("div", "actions"); act.style.justifyContent = "flex-start"; act.style.marginBottom = "16px";
+    var sv = el("button", "btn", "Save"); sv.type = "submit"; act.appendChild(sv); f.appendChild(act);
+    f.addEventListener("submit", function (ev) {
+      ev.preventDefault(); busy(sv, true, "Saving\u2026");
+      api("tpEffect", { effect: { on: on.checked, introSeconds: sec.value, override: sea.value, overrideUntil: sea.value ? unt.value : "" } })
+        .then(function (j) { state.tenant.effect = j.effect; state.status = j.status; renderStatus(); renderTenant(); toast("Saved. Publish to update the website."); })
         .catch(function (err) { toast(err.message, true); }).then(function () { busy(sv, false); });
     });
     pane.appendChild(f);
