@@ -298,7 +298,7 @@
       <p class="hint" style="margin-top:18px">Trouble signing in? <a class="link" id="signin-help" href="#">Email support</a></p>
     </div>
     <div id="step-code" hidden>
-      <p class="lead">Enter the code sent to <b id="sent-to"></b>. It expires in 10 minutes.</p>
+      <p class="lead"><b>Check your email.</b> If <b id="sent-to"></b> has access to this editor, a 6-digit code is on its way (it expires in 10 minutes). If it doesn't, you'll get an email explaining how to get access instead.</p>
       <form id="f-code">
         <label class="f"><span>Code</span><input type="text" id="code" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required></label>
         <button class="btn" type="submit" id="b-verify">Sign in</button>
@@ -927,7 +927,7 @@ var SIGNIN_HELP_EMAIL = "lindsey.huffman@cbre.com";
   var $ = function (id) { return document.getElementById(id); };
   var state = { token: null, me: null, suites: [], buildings: [], status: {}, editing: null, publicBase: "", types: [], contacts: [] };
   var READY = "Reserve Ready Suite", CAMPUS = "Campus Availability";
-  var BACKEND_VERSION = "11";   // must match CONFIG.VERSION in Code.gs
+  var BACKEND_VERSION = "12";   // must match CONFIG.VERSION in Code.gs
   function PUBLIC_BASE() { return state.publicBase || "https://thereservebellevue.github.io/web/"; }
   var SKEY = "reserve-editor-session";
 
@@ -975,7 +975,7 @@ var SIGNIN_HELP_EMAIL = "lindsey.huffman@cbre.com";
       .then(function () { busy(b, false); });
   }
   $("f-email").addEventListener("submit", sendCode);
-  $("b-resend").addEventListener("click", function () { $("email").value = pendingEmail; sendCode(); toast("New code sent."); });
+  $("b-resend").addEventListener("click", function () { $("email").value = pendingEmail; sendCode(); toast("Sent again. Check your email."); });
   $("b-other").addEventListener("click", function () { $("step-email").hidden = false; $("step-code").hidden = true; $("email").focus(); });
   $("code").addEventListener("input", function () { this.value = this.value.replace(/\D/g, "").slice(0, 6); if (this.value.length === 6) $("f-code").requestSubmit(); });
   $("f-code").addEventListener("submit", function (e) {
@@ -1948,11 +1948,11 @@ var SIGNIN_HELP_EMAIL = "lindsey.huffman@cbre.com";
   }
   function renderTpEffect(pane) {
     var e = state.tenant.effect || { on: true, introSeconds: 3, override: "", overrideUntil: "" }, f = el("form", "tp-form");
-    f.appendChild(el("p", "intro", "Snow, petals, fog or leaves fill the Tenant Portal for a few seconds when it opens (people can push them around with the mouse or a finger), then settle at the bottom of the screen. It follows the seasons in Bellevue automatically, or you can pick a season for a while."));
+    f.appendChild(el("p", "intro", "When the Tenant Portal opens, a shower of snow, petals or leaves falls and piles up at the bottom of the screen (in summer, the fog rolls in instead). People can push pieces around and kick up the pile with the mouse or a finger, and single pieces keep drifting down now and then. It follows the seasons in Bellevue automatically, or you can pick a season for a while."));
     var now = el("p", "hint"); now.style.margin = "0 0 18px"; f.appendChild(now);
     var onL = el("label", "switch"), on = el("input"); on.type = "checkbox"; on.checked = e.on !== false; on.id = "fx-on";
     onL.appendChild(on); onL.appendChild(document.createTextNode(" Show the seasonal effect on the Tenant Portal")); f.appendChild(onL);
-    var secL = el("label", "f"); secL.appendChild(el("span", null, "How long it fills the screen before settling (seconds)"));
+    var secL = el("label", "f"); secL.appendChild(el("span", null, "How long the opening shower lasts (seconds; for the fog, how long it stays before settling)"));
     var sec = el("input"); sec.type = "number"; sec.min = 0; sec.max = 20; sec.step = 0.5; sec.value = e.introSeconds; sec.id = "fx-sec"; sec.style.maxWidth = "140px";
     secL.appendChild(sec); f.appendChild(secL);
     var seaL = el("label", "f"); seaL.appendChild(el("span", null, "Season"));
