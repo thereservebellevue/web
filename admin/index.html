@@ -867,15 +867,23 @@
 
       var people = (o.contacts || []).filter(function (c) { return c && c.name; }).slice(0, 3);
       var colW = people.length > 2 ? L.contacts.colW3 : L.contacts.colW;
+      // One size for every name and one for every detail line: if the longest one has to shrink to fit
+      // its column, they all shrink with it, so the contacts always match.
+      var maxW = P(colW - 10), nameSize = L.contacts.nameSize, detailSize = L.contacts.detailSize;
+      people.forEach(function (c) {
+        nameSize = Math.min(nameSize, fitFont(ctx, F.name, L.contacts.nameSize, c.name.toUpperCase(), maxW, L.contacts.nameTrack));
+        [c.title, c.email, c.phone].forEach(function (t) {
+          if (t) detailSize = Math.min(detailSize, fitFont(ctx, F.detail, L.contacts.detailSize, t, maxW, 0.02));
+        });
+      });
       people.forEach(function (c, i) {
-        var x = L.contacts.x + i * colW, maxW = P(colW - 10);
+        var x = L.contacts.x + i * colW;
         ctx.fillStyle = C.cream;
-        fitFont(ctx, F.name, L.contacts.nameSize, c.name.toUpperCase(), maxW, L.contacts.nameTrack);
+        ctx.font = font(F.name, nameSize);
         tracked(ctx, c.name.toUpperCase(), P(x), P(L.contacts.lines[0]), L.contacts.nameTrack);
+        ctx.font = font(F.detail, detailSize);
         [c.title, c.email, c.phone].forEach(function (t, j) {
-          if (!t) return;
-          fitFont(ctx, F.detail, L.contacts.detailSize, t, maxW, 0.02);
-          tracked(ctx, t, P(x), P(L.contacts.lines[j + 1]), 0.02);
+          if (t) tracked(ctx, t, P(x), P(L.contacts.lines[j + 1]), 0.02);
         });
       });
 
