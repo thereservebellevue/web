@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-16T12:08:00.309Z",
+  "updated": "2026-11-16T12:37:55.358Z",
   "intro": {
     "title": "Explore the Campus",
     "text": "Click a building or anything in the map key to learn more."
@@ -56,14 +56,14 @@
     },
     "gym": {
       "text": "",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/campus/jjl-1279-gym1-2-mwj7zx3m.jpg#crop=0.534,0.606,1.27",
       "show": true,
       "clickable": true,
       "name": "Gym"
     },
     "ev": {
       "text": "",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/campus/adobestock-493385050-mwj8345h.jpg",
       "show": true,
       "clickable": true,
       "name": "EV Charging Stations"
