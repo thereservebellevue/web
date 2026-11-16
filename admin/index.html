@@ -534,7 +534,10 @@
           <a id="a-pdf" target="_blank" rel="noopener" hidden>Open current PDF</a>
         </div>
       </div>
-      <label class="f" style="margin-top:16px"><span>Internal notes <small style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted)">(never shown on the website)</small></span>
+      <label class="f" style="margin-top:16px"><span>3D tour link <small style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted)">(optional: Matterport)</small></span>
+        <input type="text" id="s-tour" inputmode="url" autocomplete="off" placeholder="https://my.matterport.com/show/?m=...">
+        <div class="hint">Paste the tour's share link. The website then shows a 360&deg; link in the table and a 3D Tour button in the suite's popup. Leave blank for none.</div></label>
+      <label class="f"><span>Internal notes <small style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted)">(never shown on the website)</small></span>
         <textarea id="s-notes"></textarea></label>
       <label class="switch"><input type="checkbox" id="s-show" checked> Show on website</label>
       <p class="err" id="e-suite" hidden></p>
@@ -935,7 +938,7 @@ var SIGNIN_HELP_EMAIL = "lindsey.huffman@cbre.com";
   var $ = function (id) { return document.getElementById(id); };
   var state = { token: null, me: null, suites: [], buildings: [], status: {}, editing: null, publicBase: "", types: [], contacts: [] };
   var READY = "Reserve Ready Suite", CAMPUS = "Campus Availability";
-  var BACKEND_VERSION = "12";   // must match CONFIG.VERSION in Code.gs
+  var BACKEND_VERSION = "13";   // must match CONFIG.VERSION in Code.gs
   function PUBLIC_BASE() { return state.publicBase || "https://thereservebellevue.github.io/web/"; }
   var SKEY = "reserve-editor-session";
 
@@ -1099,6 +1102,11 @@ var SIGNIN_HELP_EMAIL = "lindsey.huffman@cbre.com";
         add.addEventListener("click", function () { quickPlan(s); });
         tf.appendChild(add);
       }
+      if (s.matterport) {                                    // has a 3D tour: quick link to check it
+        var t3 = el("a", "pdfl", "3D tour \u2197"); t3.href = s.matterport; t3.target = "_blank"; t3.rel = "noopener";
+        t3.title = "Open the 3D tour"; t3.style.marginTop = "5px";
+        tf.appendChild(t3);
+      }
       tr.appendChild(tf);
       var to = el("td", "c-on"); to.appendChild(el("span", "pill " + (s.show ? "on" : "offp"), s.show ? "Shown" : "Hidden")); tr.appendChild(to);
       var ta = el("td", "act");
@@ -1141,6 +1149,7 @@ var SIGNIN_HELP_EMAIL = "lindsey.huffman@cbre.com";
     $("s-building").value = s ? s.building : ($("filter-b").value || "");
     $("s-suite").value = s ? s.suite : ""; $("s-sf").value = s ? s.sf : ""; $("s-floor").value = s ? s.floor : "";
     $("s-notes").value = s ? s.notes : ""; $("s-show").checked = s ? s.show : true;
+    $("s-tour").value = s ? (s.matterport || "") : "";
     $("s-ready").checked = s ? s.type === READY : $("filter-t").value === READY; syncRR();
     plan = s ? s.floorplan : ""; setPlanPreview(plan);
     keyplan = s ? (s.keyplan || "") : ""; setKeyPreview(keyplan);
@@ -1218,7 +1227,7 @@ var SIGNIN_HELP_EMAIL = "lindsey.huffman@cbre.com";
                              keyplan !== (s.keyplan || "") || f.north !== (s.north || ""));
     api("saveSuite", { suite: { id: s.id, building: f.building, suite: f.suite, sf: $("s-sf").value,
       floor: $("s-floor").value, type: $("s-ready").checked ? READY : CAMPUS, floorplan: plan, pdf: plan ? (s.pdf || "") : "",
-      keyplan: keyplan, north: f.north,
+      keyplan: keyplan, north: f.north, matterport: $("s-tour").value.trim(),
       notes: $("s-notes").value, show: $("s-show").checked } })
       .then(function (j) {
         state.status = j.status;
