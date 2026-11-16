@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-16T12:08:04.520Z",
+  "updated": "2026-11-16T12:38:00.116Z",
   "intro": {
     "title": "Tenant Portal",
     "text": "Everything for The Reserve's tenants in one place: what's happening on campus, amenities, forms and who to contact."
@@ -56,12 +56,7 @@
       "hours": "Weekdays, 11:00 AM - 2:00 PM",
       "text": "Local food trucks serve lunch at Gateway 112 (11201 SE 8th St).",
       "image": "https://thereservebellevue.github.io/web/assets/tenant/bop-foodtruck-3-mw5e4748.jpg",
-      "buttons": [
-        {
-          "label": "Monthly schedule",
-          "url": "https://bellefield-officepark.com/wp-content/uploads/2026/07/July-Food-Truck-Schedule.pdf"
-        }
-      ]
+      "buttons": []
     },
     {
       "name": "Dilettante Mocha Cafe",
@@ -70,7 +65,7 @@
       "note": "",
       "hours": "Mon - Fri, 6:30 AM - 5:00 PM",
       "text": "Breakfast, espresso drinks, lunch and happy hour. Order online or call (425) 451-4068 for pickup.",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/tenant/15071-0626p-mwj8874j.jpg#crop=0.500,0.523,1.00",
       "buttons": [
         {
           "label": "Order online",
@@ -93,7 +88,7 @@
       "note": "Fall series ended",
       "hours": "Thursdays, 8:00 - 9:00 AM",
       "text": "Complimentary classes for tenants at ZenRock Bellevue, rotating monthly: yoga, strength, core and cardio. RSVP by email.",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/tenant/web-21-mwj8br92.jpg",
       "buttons": [
         {
           "label": "RSVP",
@@ -112,11 +107,11 @@
       "note": "Closed for renovations",
       "hours": "",
       "text": "Temporarily closed for renovations. You can submit your waiver ahead of time by emailing Gabbie.",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/tenant/jjl-1283-gym1-3-mwj8cj5y.jpg#crop=0.701,0.585,1.67",
       "buttons": [
         {
           "label": "Fitness Center waiver",
-          "url": "https://bellefield-officepark.com/wp-content/uploads/2026/06/Fitness-Center-Waiver-GC-Bellefield-Fillable-PDF.pdf"
+          "url": "https://thereservebellevue.github.io/web/assets/tenant/fitness-center-waiver-gc-bellefield-fill-mwj8dmzz.pdf"
         },
         {
           "label": "Email Gabbie",
@@ -150,11 +145,11 @@
       "note": "",
       "hours": "",
       "text": "Nature trails start right outside the office. Look for “Habitat Being Created Here” signs near fallen trees left for wildlife.",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/tenant/264774-31e-edited-mwj8kmoe.jpg",
       "buttons": [
         {
           "label": "Trail map",
-          "url": "https://bellefield-officepark.com/wp-content/uploads/2017/10/BellefieldWalkingMapTrail.pdf"
+          "url": "https://thereservebellevue.github.io/web/assets/tenant/thereservewalkingmaptrail-mwj90bj7.pdf"
         },
         {
           "label": "Vegetation plan",
@@ -169,7 +164,7 @@
       "note": "Closed for renovations",
       "hours": "",
       "text": "Temporarily closed for renovations. Questions? Contact Talon M Management.",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/tenant/jjl-1263-conference-room-mwj8eptj.jpg",
       "buttons": []
     },
     {
@@ -179,11 +174,11 @@
       "note": "",
       "hours": "",
       "text": "Bakker's Fine Dry Cleaning picks up and delivers right to your office, with The Reserve's preferred pricing.",
-      "image": "",
+      "image": "https://thereservebellevue.github.io/web/assets/tenant/adobestock-328536222-mwj8h66o.jpg",
       "buttons": [
         {
           "label": "How it works",
-          "url": "https://bellefield-officepark.com/wp-content/uploads/2026/04/Drycleaning-Info-Sheet.pdf"
+          "url": "https://thereservebellevue.github.io/web/assets/tenant/drycleaning-info-sheet-mwj8hqor.pdf"
         },
         {
           "label": "Price list",
@@ -216,7 +211,7 @@
     {
       "title": "Walking trail map",
       "note": "Printable",
-      "url": "https://thereservebellevue.github.io/web/assets/tenant/trail-map-mwj2ealg.png"
+      "url": "https://thereservebellevue.github.io/web/assets/tenant/thereservewalkingmaptrail-mwj90t8z.pdf"
     },
     {
       "title": "Dry cleaning: how it works",
