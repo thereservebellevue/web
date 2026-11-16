@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-16T12:38:00.116Z",
+  "updated": "2026-11-16T12:41:42.188Z",
   "intro": {
     "title": "Tenant Portal",
     "text": "Everything for The Reserve's tenants in one place: what's happening on campus, amenities, forms and who to contact."
@@ -77,7 +77,7 @@
         },
         {
           "label": "Menu",
-          "url": "https://bellefield-officepark.com/wp-content/uploads/2021/07/Dillettante-Menu_July2021.pdf"
+          "url": "https://thereservebellevue.github.io/web/assets/tenant/dillettante-menu-july2021-mwj952zc.pdf"
         }
       ]
     },
@@ -189,24 +189,9 @@
   ],
   "documents": [
     {
-      "title": "Food truck schedule",
-      "note": "This month's lineup",
-      "url": "https://bellefield-officepark.com/wp-content/uploads/2026/07/July-Food-Truck-Schedule.pdf"
-    },
-    {
       "title": "Dilettante Mocha Cafe menu",
       "note": "",
-      "url": "https://bellefield-officepark.com/wp-content/uploads/2021/07/Dillettante-Menu_July2021.pdf"
-    },
-    {
-      "title": "Fitness Center waiver",
-      "note": "Fillable PDF",
-      "url": "https://bellefield-officepark.com/wp-content/uploads/2026/06/Fitness-Center-Waiver-GC-Bellefield-Fillable-PDF.pdf"
-    },
-    {
-      "title": "Equipment share application + waiver",
-      "note": "Kayaks and paddleboards",
-      "url": "https://bellefield-officepark.com/wp-content/uploads/2026/06/Share-Program-Application-Waiver-of-Liability-GC-Bellefield.pdf"
+      "url": "https://thereservebellevue.github.io/web/assets/tenant/dillettante-menu-july2021-mwj9401l.pdf"
     },
     {
       "title": "Walking trail map",
@@ -216,7 +201,7 @@
     {
       "title": "Dry cleaning: how it works",
       "note": "Bakker's Fine Dry Cleaning",
-      "url": "https://bellefield-officepark.com/wp-content/uploads/2026/04/Drycleaning-Info-Sheet.pdf"
+      "url": "https://thereservebellevue.github.io/web/assets/tenant/drycleaning-info-sheet-mwj94g8m.pdf"
     }
   ],
   "contacts": [
