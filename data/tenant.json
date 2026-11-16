@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-09T19:11:23.537Z",
+  "updated": "2026-11-16T12:08:04.520Z",
   "intro": {
     "title": "Tenant Portal",
     "text": "Everything for The Reserve's tenants in one place: what's happening on campus, amenities, forms and who to contact."
@@ -216,7 +216,7 @@
     {
       "title": "Walking trail map",
       "note": "Printable",
-      "url": "https://bellefield-officepark.com/wp-content/uploads/2017/10/BellefieldWalkingMapTrail.pdf"
+      "url": "https://thereservebellevue.github.io/web/assets/tenant/trail-map-mwj2ealg.png"
     },
     {
       "title": "Dry cleaning: how it works",
@@ -250,7 +250,7 @@
   "connect": {
     "title": "Connect with us",
     "text": "Share your company news, photos or events and we may feature them.",
-    "hashtag": "#BellefieldOP",
+    "hashtag": "#TheReserveOP",
     "email": "gwhite@talon-m.com",
     "links": [
       {
@@ -262,5 +262,11 @@
         "url": "https://www.facebook.com/BellefieldOP"
       }
     ]
+  },
+  "effect": {
+    "on": true,
+    "introSeconds": 3,
+    "override": "",
+    "overrideUntil": ""
   }
 }
