@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-16T12:41:42.188Z",
+  "updated": "2026-11-16T12:51:23.922Z",
   "intro": {
     "title": "Tenant Portal",
     "text": "Everything for The Reserve's tenants in one place: what's happening on campus, amenities, forms and who to contact."
@@ -149,7 +149,7 @@
       "buttons": [
         {
           "label": "Trail map",
-          "url": "https://thereservebellevue.github.io/web/assets/tenant/thereservewalkingmaptrail-mwj90bj7.pdf"
+          "url": "https://thereservebellevue.github.io/web/assets/tenant/thereservewalkingmaptrail-mwj9hsuf.pdf"
         },
         {
           "label": "Vegetation plan",
@@ -196,7 +196,7 @@
     {
       "title": "Walking trail map",
       "note": "Printable",
-      "url": "https://thereservebellevue.github.io/web/assets/tenant/thereservewalkingmaptrail-mwj90t8z.pdf"
+      "url": "https://thereservebellevue.github.io/web/assets/tenant/thereservewalkingmaptrail-mwj9h9nj.pdf"
     },
     {
       "title": "Dry cleaning: how it works",
