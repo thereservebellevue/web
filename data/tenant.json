@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-16T12:59:43.468Z",
+  "updated": "2026-11-20T00:08:17.406Z",
   "intro": {
     "title": "Tenant Portal",
     "text": "Everything for The Reserve's tenants in one place: what's happening on campus, amenities, forms and who to contact."
@@ -178,7 +178,7 @@
       "buttons": [
         {
           "label": "How it works",
-          "url": "https://thereservebellevue.github.io/web/assets/tenant/drycleaning-info-sheet-mwj8hqor.pdf"
+          "url": "https://thereservebellevue.github.io/web/assets/tenant/The-Reserve-Dry-Cleaning-Info-Sheet.pdf"
         },
         {
           "label": "Price list",
@@ -201,7 +201,7 @@
     {
       "title": "Dry cleaning: how it works",
       "note": "Bakker's Fine Dry Cleaning",
-      "url": "https://thereservebellevue.github.io/web/assets/tenant/drycleaning-info-sheet-mwj94g8m.pdf"
+      "url": "https://thereservebellevue.github.io/web/assets/tenant/The-Reserve-Dry-Cleaning-Info-Sheet.pdf"
     }
   ],
   "contacts": [
